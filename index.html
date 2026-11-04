@@ -37,6 +37,10 @@ h1{color:#f5edf8}.hero-description{font-size:16px;color:#decee8}.eyebrow{color:#
 
 body{isolation:isolate}.nebula{opacity:.5}.stage-status .stage-counts:has(#remainingCount){opacity:1}.stage-counts #selectionCount{color:#e7d4bd}
 
+/* A single physical fan: all 78 cards overlap inside the stage. */
+.pick-deck-area{padding:12px 0 8px}.pick-deck-area .fan-scroll{max-width:none;overflow:visible}.pick-deck-area .fan-track{display:block;width:100%;height:340px;position:relative;grid-template-columns:none;gap:0;touch-action:pan-y}.pick-deck-area .pick-card{position:absolute;left:calc(50% + var(--fan-pos)*37%);top:calc(44% + var(--fan-arc)*58px);width:min(106px,15%);aspect-ratio:.60;padding:0;border:1px solid #c9a46d99;border-radius:6px;transform:translate(-50%,-50%) rotate(var(--fan-angle));transform-origin:center;z-index:var(--fan-order);box-shadow:-3px 5px 13px #0009;transition:transform .24s ease,opacity .24s,border-color .2s,box-shadow .2s;overflow:hidden;isolation:auto}.pick-deck-area .pick-card img{width:100%;height:100%;object-fit:cover;border-radius:5px;opacity:1;pointer-events:none}.pick-deck-area .pick-card:enabled:hover{transform:translate(-50%,-50%) rotate(var(--fan-angle));z-index:var(--fan-order);box-shadow:-3px 5px 13px #0009}.pick-deck-area .pick-card.is-hovered:enabled,.pick-deck-area .pick-card:enabled:focus-visible{transform:translate(-50%,calc(-50% - 42px)) rotate(0deg);z-index:200;border-color:#ffe0a2;box-shadow:0 0 28px #cfad6b88}.pick-deck-area .pick-card.is-hovered:enabled:after{content:'抽取这张';position:absolute;left:0;right:0;bottom:14px;text-align:center;color:#ffe8b8;background:#211529d9;font-size:13px;padding:3px 0;pointer-events:none}.pick-deck-area .pick-card.is-picked{opacity:0;pointer-events:none;transform:translate(-50%,calc(-50% - 110px)) rotate(var(--fan-angle)) scale(.85);border-width:1px;box-shadow:none}.pick-deck-area .pick-card.is-picked img{opacity:1}.pick-deck-area .pick-badge{display:none!important}.pick-deck-area .drawn-cards{height:96px;min-height:0;width:100%;display:flex;justify-content:center;align-items:center;gap:10px}.pick-deck-area .drawn-back{width:min(55px,calc(360px/var(--draw-count)));height:auto;aspect-ratio:.60;position:relative;display:block;animation:none;box-shadow:0 5px 15px #0006}.pick-deck-area .drawn-back img{width:100%;height:100%;display:block;border:1px solid #dbbb7d77;border-radius:4px}.pick-deck-area .drawn-back b{position:absolute;top:3px;left:3px;bottom:auto;right:auto;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#1b1229e6;font:12px Georgia;color:#f7d694}.pick-deck-area .just-drawn{animation:drawToTray .35s ease-out both}@keyframes drawToTray{from{opacity:0;transform:translateY(-65px) rotate(-8deg)}to{opacity:1;transform:none}}.is-shuffling .pick-card{animation:shuffleTheFan .28s ease-in-out infinite alternate}@keyframes shuffleTheFan{to{transform:translate(-50%,calc(-50% - 6px)) rotate(calc(var(--fan-angle)*.85))}}
+@media(max-width:740px){.pick-deck-area{padding:5px 0}.pick-deck-area .fan-track{height:280px}.pick-deck-area .pick-card{left:calc(50% + var(--fan-pos)*28%);top:calc(44% + var(--fan-arc)*38px);width:min(80px,23%)}.pick-deck-area .pick-card.is-hovered:enabled,.pick-deck-area .pick-card:enabled:focus-visible{transform:translate(-50%,calc(-50% - 30px)) rotate(0deg)}.pick-deck-area .pick-card.is-hovered:enabled:after{font-size:11px;bottom:10px}.pick-deck-area .drawn-cards{height:82px;gap:6px}.pick-deck-area .drawn-back{width:min(45px,calc(240px/var(--draw-count)))}.pick-deck-area .drawn-back b{width:16px;height:16px;font-size:11px}}
+
 </style>
 </head>
 <body style="background-color:#100d18;color:#efe7f4">
@@ -63,7 +67,7 @@ body{isolation:isolate}.nebula{opacity:.5}.stage-status .stage-counts:has(#remai
  <div id="deckSection" class="oracle-side compact-oracle">
   <div class="orbital" aria-hidden="true"><div class="orbit-ring ring-one"></div><div class="orbit-ring ring-two"></div><div class="orbit-ring ring-three"></div><span class="orbit-symbol north">☽</span><span class="orbit-symbol south">✧</span><span class="orbit-symbol west">✦</span><span class="orbit-symbol east">✷</span></div>
   <div id="oracleStage" class="oracle-stage" data-layout="row" data-mode="ready">
-   <div id="fanArea" class="fan-area pick-deck-area"><div class="fan-scroll" id="fanScroll"><div id="fullDeck" class="fan-track" role="group" aria-label="完整78张牌，任选牌背逐张抽取"></div></div></div>
+   <div id="fanArea" class="fan-area pick-deck-area"><div class="fan-scroll" id="fanScroll"><div id="fullDeck" class="fan-track" role="group" aria-label="完整78张牌，扇形展开供你点选"></div></div><div id="drawnCards" class="drawn-cards" aria-label="已抽出的牌"></div></div>
    <div id="resultSpread" class="stage-display" aria-label="按牌位摆放的牌阵" hidden></div>
   </div>
   <div class="stage-status" aria-live="polite"><strong id="stageTitle">三张指引</strong><span id="stageHint">完整 78 张牌，点选任意一张</span><div class="stage-counts"><span id="remainingCount" hidden>完整 78 张</span><span id="selectionCount">已选 0 / 3</span></div></div>
@@ -274,13 +278,21 @@ function updatePreview(){
 }
 function updateSetup(){const s=E.SPREADS[spreadId];$('spreadSelect').value=spreadId;$('spreadDescription').textContent=s.description;$('choiceFields').hidden=spreadId!=='choice';$('shuffleLabel').textContent='洗牌，开始选牌';updatePreview();updateDeck();}
 function resetReady(){generation++;$('fullDeck').classList.remove('is-shuffling');mode='ready';selected=[];deck=cards.map(c=>({cardId:c.id,reversed:false}));session=null;setLocked(false);$('shuffleBtn').disabled=false;$('reading').hidden=true;updateSetup();}
+let hoveredFan=-1;
+function clearFanHover(){if(hoveredFan>=0)$('fullDeck').children[hoveredFan]?.classList.remove('is-hovered');hoveredFan=-1;}
+function highlightFan(index){if(!['ready','selecting'].includes(mode)||index===hoveredFan)return;clearFanHover();if(index>=0&&!selected.includes(index)){$('fullDeck').children[index]?.classList.add('is-hovered');hoveredFan=index;}}
+function fanPickIndex(event){const r=$('fullDeck').getBoundingClientRect(),edge=innerWidth<741?.22:.13;const target=Math.max(0,Math.min(77,Math.round(((event.clientX-r.left)/r.width-edge)/(1-2*edge)*77)));for(let d=0;d<78;d++){for(const i of [target-d,target+d])if(i>=0&&i<78&&!selected.includes(i))return i;}return -1;}
 function renderDeck(){
  const grid=$('fullDeck');grid.replaceChildren();
  for(let i=0;i<78;i++){
-  const b=document.createElement('button');b.className='pick-card';b.dataset.index=i;
+  const b=document.createElement('button'),t=(i-38.5)/38.5;b.className='pick-card';b.dataset.index=i;
+  b.style.setProperty('--fan-pos',t);b.style.setProperty('--fan-angle',(t*32)+'deg');b.style.setProperty('--fan-arc',t*t);b.style.setProperty('--fan-order',i);
   b.innerHTML='<img src="./assets/back.svg" alt="" draggable="false"><span class="pick-badge" aria-hidden="true"></span>';
-  b.onclick=async()=>{if(mode==='ready'){await shuffle();if(mode==='selecting')choose(i);}else choose(i);};grid.append(b);
+  b.onfocus=()=>{if(b.matches(':focus-visible'))highlightFan(i);};grid.append(b);
  }
+ grid.onpointermove=e=>{if(e.pointerType==='mouse'&&e.target.closest('.pick-card'))highlightFan(fanPickIndex(e));};
+ grid.onpointerdown=e=>{if(e.target.closest('.pick-card'))highlightFan(fanPickIndex(e));};grid.onpointerleave=clearFanHover;
+ grid.onclick=async e=>{const b=e.target.closest('.pick-card');if(!b||!['ready','selecting'].includes(mode))return;const index=e.detail===0?Number(b.dataset.index):fanPickIndex(e);if(index<0||selected.includes(index))return;if(mode==='ready')await shuffle();if(mode==='selecting')choose(index);};
  updateDeck();
 }
 
@@ -295,23 +307,25 @@ function updateDeck(){
   b.querySelector('.pick-badge').textContent=picked?String(order+1):'';
  });
 
+ const tray=$('drawnCards');tray.style.setProperty('--draw-count',Math.max(1,n));tray.replaceChildren();selected.forEach((_,i)=>{const b=document.createElement('span');b.className='drawn-back'+(i===n-1?' just-drawn':'');b.innerHTML=`<img src="./assets/back.svg" alt="第${i+1}张已抽出，等待翻开"><b>${i+1}</b>`;tray.append(b);});
+
  $('cancelDrawBtn').hidden=!['shuffling','selecting','complete'].includes(mode);
  $('undoBtn').hidden=!['selecting','complete'].includes(mode);$('undoBtn').disabled=!n;
  $('autoDrawBtn').hidden=!active;$('autoDrawBtn').disabled=!active;
  $('revealBtn').hidden=mode!=='complete';$('shuffleBtn').hidden=['complete','revealing'].includes(mode);
- const hints={ready:'完整 78 张牌 · 点选任意一张',shuffling:'正在洗牌…',complete:'已按牌阵摆好，准备翻开',revealing:'让这一组牌慢慢展开',revealed:'点一张牌，读它在此处的含义'};
+ const hints={ready:'完整 78 张牌 · 凭直觉点选扇面中的一张',shuffling:'正在洗牌…',complete:'已按牌阵摆好，准备翻开',revealing:'让这一组牌慢慢展开',revealed:'点一张牌，读它在此处的含义'};
  $('stageHint').textContent=active?`第 ${n+1} 张 · ${spread.slots[n].label}`:hints[mode];
  $('drawStep').textContent=$('stageHint').textContent;$('drawHelp').textContent='';$('deckState').textContent='';
  updatePreview();
 }
 async function shuffle(){
  if(mode==='shuffling'||mode==='revealing')return;
- const token=++generation;mode='shuffling';selected=[];$('reading').hidden=true;setLocked(true);$('shuffleBtn').disabled=true;$('fullDeck').classList.add('is-shuffling');
+ const token=++generation;clearFanHover();mode='shuffling';selected=[];$('reading').hidden=true;setLocked(true);$('shuffleBtn').disabled=true;$('fullDeck').classList.add('is-shuffling');
  session={spreadId,focus,question:$('question').value.trim().slice(0,600),period:$('periodSelect').value,options:{a:$('optionA').value.trim().slice(0,100)||'选项 A',b:$('optionB').value.trim().slice(0,100)||'选项 B'}};
  deck=E.createDeck(rand).map(cardId=>({cardId,reversed:$('allowReverse').checked&&rand(2)===1}));updatePreview();updateDeck();chime();
  await sleep(1000);if(token!==generation)return;mode='selecting';$('fullDeck').classList.remove('is-shuffling');$('shuffleBtn').disabled=false;$('shuffleLabel').textContent='重新洗牌 · 放回已选';updateDeck();if(innerWidth<741)$('deckSection').scrollIntoView({behavior:reduced?'auto':'smooth',block:'center'});
 }
-function choose(index,quiet=false){if(mode!=='selecting'||selected.includes(index)||selected.length>=E.SPREADS[spreadId].count)return;selected.push(index);const img=new Image();img.src=cards[deck[index].cardId].image;if(selected.length===E.SPREADS[spreadId].count)mode='complete';updatePreview();updateDeck();if(!quiet&&mode==='complete')chime();}
+function choose(index,quiet=false){if(mode!=='selecting'||selected.includes(index)||selected.length>=E.SPREADS[spreadId].count)return;selected.push(index);clearFanHover();const img=new Image();img.src=cards[deck[index].cardId].image;if(selected.length===E.SPREADS[spreadId].count)mode='complete';updatePreview();updateDeck();if(!quiet&&mode==='complete')chime();}
 function undo(){if(!selected.length||!['complete','selecting'].includes(mode))return;selected.pop();mode='selecting';updatePreview();updateDeck();}
 function autoDraw(){if(mode!=='selecting')return;while(selected.length<E.SPREADS[spreadId].count){const available=deck.map((_,i)=>i).filter(i=>!selected.includes(i));choose(available[rand(available.length)],true);}chime();}
 async function reveal(){
