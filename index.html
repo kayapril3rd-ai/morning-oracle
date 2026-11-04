@@ -41,6 +41,9 @@ body{isolation:isolate}.nebula{opacity:.5}.stage-status .stage-counts:has(#remai
 .pick-deck-area{padding:12px 0 8px}.pick-deck-area .fan-scroll{max-width:none;overflow:visible}.pick-deck-area .fan-track{display:block;width:100%;height:340px;position:relative;grid-template-columns:none;gap:0;touch-action:pan-y}.pick-deck-area .pick-card{position:absolute;left:calc(50% + var(--fan-pos)*37%);top:calc(44% + var(--fan-arc)*58px);width:min(106px,15%);aspect-ratio:.60;padding:0;border:1px solid #c9a46d99;border-radius:6px;transform:translate(-50%,-50%) rotate(var(--fan-angle));transform-origin:center;z-index:var(--fan-order);box-shadow:-3px 5px 13px #0009;transition:transform .24s ease,opacity .24s,border-color .2s,box-shadow .2s;overflow:hidden;isolation:auto}.pick-deck-area .pick-card img{width:100%;height:100%;object-fit:cover;border-radius:5px;opacity:1;pointer-events:none}.pick-deck-area .pick-card:enabled:hover{transform:translate(-50%,-50%) rotate(var(--fan-angle));z-index:var(--fan-order);box-shadow:-3px 5px 13px #0009}.pick-deck-area .pick-card.is-hovered:enabled,.pick-deck-area .pick-card:enabled:focus-visible{transform:translate(-50%,calc(-50% - 42px)) rotate(0deg);z-index:200;border-color:#ffe0a2;box-shadow:0 0 28px #cfad6b88}.pick-deck-area .pick-card.is-hovered:enabled:after{content:'抽取这张';position:absolute;left:0;right:0;bottom:14px;text-align:center;color:#ffe8b8;background:#211529d9;font-size:13px;padding:3px 0;pointer-events:none}.pick-deck-area .pick-card.is-picked{opacity:0;pointer-events:none;transform:translate(-50%,calc(-50% - 110px)) rotate(var(--fan-angle)) scale(.85);border-width:1px;box-shadow:none}.pick-deck-area .pick-card.is-picked img{opacity:1}.pick-deck-area .pick-badge{display:none!important}.pick-deck-area .drawn-cards{height:96px;min-height:0;width:100%;display:flex;justify-content:center;align-items:center;gap:10px}.pick-deck-area .drawn-back{width:min(55px,calc(360px/var(--draw-count)));height:auto;aspect-ratio:.60;position:relative;display:block;animation:none;box-shadow:0 5px 15px #0006}.pick-deck-area .drawn-back img{width:100%;height:100%;display:block;border:1px solid #dbbb7d77;border-radius:4px}.pick-deck-area .drawn-back b{position:absolute;top:3px;left:3px;bottom:auto;right:auto;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#1b1229e6;font:12px Georgia;color:#f7d694}.pick-deck-area .just-drawn{animation:drawToTray .35s ease-out both}@keyframes drawToTray{from{opacity:0;transform:translateY(-65px) rotate(-8deg)}to{opacity:1;transform:none}}.is-shuffling .pick-card{animation:shuffleTheFan .28s ease-in-out infinite alternate}@keyframes shuffleTheFan{to{transform:translate(-50%,calc(-50% - 6px)) rotate(calc(var(--fan-angle)*.85))}}
 @media(max-width:740px){.pick-deck-area{padding:5px 0}.pick-deck-area .fan-track{height:280px}.pick-deck-area .pick-card{left:calc(50% + var(--fan-pos)*28%);top:calc(44% + var(--fan-arc)*38px);width:min(80px,23%)}.pick-deck-area .pick-card.is-hovered:enabled,.pick-deck-area .pick-card:enabled:focus-visible{transform:translate(-50%,calc(-50% - 30px)) rotate(0deg)}.pick-deck-area .pick-card.is-hovered:enabled:after{font-size:11px;bottom:10px}.pick-deck-area .drawn-cards{height:82px;gap:6px}.pick-deck-area .drawn-back{width:min(45px,calc(240px/var(--draw-count)))}.pick-deck-area .drawn-back b{width:16px;height:16px;font-size:11px}}
 
+/* Selected cards can be returned individually before revealing. */
+.pick-deck-area .drawn-back{padding:0;border:0;background:transparent;cursor:pointer;transition:transform .2s,box-shadow .2s}.pick-deck-area .drawn-back:enabled:hover,.pick-deck-area .drawn-back:focus-visible{transform:translateY(-5px);box-shadow:0 0 18px #cfad6b66;outline:2px solid #edce8e;outline-offset:3px}.pick-deck-area .drawn-back:enabled:hover:after,.pick-deck-area .drawn-back:focus-visible:after{content:"放回";position:absolute;left:0;right:0;bottom:8px;background:#211529e8;color:#ffe8b8;font-size:12px;line-height:1.8;text-align:center}.stage-slot.can-return:hover .card-frame,.stage-slot.can-return:focus-visible .card-frame{box-shadow:0 0 25px #cfad6b88;outline:2px solid #edce8e;outline-offset:3px}
+
 </style>
 </head>
 <body style="background-color:#100d18;color:#efe7f4">
@@ -241,15 +244,15 @@ function renderSlots(container,id,picks=[],reveal=false){
  const spread=E.SPREADS[id],cols=spread.layout==='celtic'?7:5,maxRow=Math.max(...spread.slots.map(x=>x.row));
  container.className='stage-display layout-'+spread.layout;container.replaceChildren();
  spread.slots.forEach((slot,i)=>{
-  const pick=picks[i],c=pick?cards[pick.cardId]:null,face=!!(reveal&&pick),item=document.createElement('button');
-  item.className='stage-slot'+(slot.cross?' cross-slot':'')+(face?' is-up':'');
+  const pick=picks[i],c=pick?cards[pick.cardId]:null,face=!!(reveal&&pick),canReturn=!!pick&&!face&&mode==='complete',item=document.createElement('button');
+  item.className='stage-slot'+(slot.cross?' cross-slot':'')+(face?' is-up':'')+(canReturn?' can-return':'');
   let x=cols===7?8+(slot.col-1)*14:14+(slot.col-1)*18;
   if(spread.layout==='row')x=20+(slot.col-1)*15;if(spread.layout==='single')x=50;
   const y=maxRow===1?47:maxRow===3?17+(slot.row-1)*33:12+(slot.row-1)*76/(maxRow-1);
   item.style.setProperty('--x',x+'%');item.style.setProperty('--y',y+'%');item.style.setProperty('--order',i);
-  item.disabled=!face;item.setAttribute('aria-label',`${i+1}. ${slot.label}${face?'：'+c.name+'，'+(pick.reversed?'逆位':'正位')+'，查看详解':'，待翻开'}`);
+  item.disabled=!(face||canReturn);item.setAttribute('aria-label',`${i+1}. ${slot.label}${face?'：'+c.name+'，'+(pick.reversed?'逆位':'正位')+'，查看详解':canReturn?'，点击放回重选':'，待翻开'}`);if(canReturn)item.title='点击放回这张牌';
   item.innerHTML=`<span class="stage-plate"><span class="card-frame"><span class="frame-back"><img src="./assets/back.svg" alt=""></span><span class="frame-front${face&&pick.reversed?' is-reversed':''}">${face?`<img src="${c.image}" alt="${esc(c.name)}">`:''}</span></span><span class="stage-number">${i+1}</span></span><span class="stage-card-label"><strong>${esc(slot.label)}</strong>${face?`<small>${esc(c.name)}<span class="card-direction">${pick.reversed?'逆位':'正位'}</span></small>`:''}</span>`;
-  if(face)item.onclick=()=>openDetails('details',i);container.append(item);
+  if(face)item.onclick=()=>openDetails('details',i);else if(canReturn)item.onclick=()=>returnCard(i);container.append(item);
  });
 }
 function openDetails(tab='overview',index=null){
@@ -307,7 +310,7 @@ function updateDeck(){
   b.querySelector('.pick-badge').textContent=picked?String(order+1):'';
  });
 
- const tray=$('drawnCards');tray.style.setProperty('--draw-count',Math.max(1,n));tray.replaceChildren();selected.forEach((_,i)=>{const b=document.createElement('span');b.className='drawn-back'+(i===n-1?' just-drawn':'');b.innerHTML=`<img src="./assets/back.svg" alt="第${i+1}张已抽出，等待翻开"><b>${i+1}</b>`;tray.append(b);});
+ const tray=$('drawnCards');tray.style.setProperty('--draw-count',Math.max(1,n));tray.replaceChildren();selected.forEach((_,i)=>{const b=document.createElement('button');b.type='button';b.className='drawn-back';b.disabled=!['selecting','complete'].includes(mode);b.setAttribute('aria-label',`放回第 ${i+1} 张已选牌`);b.title='点击放回这张牌';b.innerHTML=`<img src="./assets/back.svg" alt=""><b>${i+1}</b>`;b.onclick=()=>returnCard(i);tray.append(b);});
 
  $('cancelDrawBtn').hidden=!['shuffling','selecting','complete'].includes(mode);
  $('undoBtn').hidden=!['selecting','complete'].includes(mode);$('undoBtn').disabled=!n;
@@ -326,7 +329,8 @@ async function shuffle(){
  await sleep(1000);if(token!==generation)return;mode='selecting';$('fullDeck').classList.remove('is-shuffling');$('shuffleBtn').disabled=false;$('shuffleLabel').textContent='重新洗牌 · 放回已选';updateDeck();if(innerWidth<741)$('deckSection').scrollIntoView({behavior:reduced?'auto':'smooth',block:'center'});
 }
 function choose(index,quiet=false){if(mode!=='selecting'||selected.includes(index)||selected.length>=E.SPREADS[spreadId].count)return;selected.push(index);clearFanHover();const img=new Image();img.src=cards[deck[index].cardId].image;if(selected.length===E.SPREADS[spreadId].count)mode='complete';updatePreview();updateDeck();if(!quiet&&mode==='complete')chime();}
-function undo(){if(!selected.length||!['complete','selecting'].includes(mode))return;selected.pop();mode='selecting';updatePreview();updateDeck();}
+function returnCard(order){if(!['complete','selecting'].includes(mode)||!Number.isInteger(order)||order<0||order>=selected.length)return;selected.splice(order,1);clearFanHover();mode='selecting';updateDeck();}
+function undo(){returnCard(selected.length-1);}
 function autoDraw(){if(mode!=='selecting')return;while(selected.length<E.SPREADS[spreadId].count){const available=deck.map((_,i)=>i).filter(i=>!selected.includes(i));choose(available[rand(available.length)],true);}chime();}
 async function reveal(){
  if(mode!=='complete'||!session)return;mode='revealing';$('shuffleBtn').disabled=true;updateDeck();const now=new Date();const r={...session,schema:2,id:now.getTime().toString(36)+'-'+rand(1000000).toString(36),picks:currentPicks(),deckOrder:deck.map(p=>p.cardId),selectionIndices:[...selected],note:'',reflection:'',date:localDay(now),createdAt:now.toISOString(),firstOfDay:!history.some(x=>x.date===localDay(now))};
