@@ -1,0 +1,399 @@
+{
+  "artist": "Pamela Colman Smith",
+  "original_deck": "Rider–Waite–Smith, 1909",
+  "source": "https://github.com/mixvlad/TarotCards/blob/main/SOURCES.md",
+  "scan_restoration": "Steve P. (steve-p.org)",
+  "license": "Public domain, original 1909 artwork",
+  "cards": [
+    {
+      "name": "00_Fool.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/00_Fool.jpg",
+      "bytes": 265857
+    },
+    {
+      "name": "01_Magician.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/01_Magician.jpg",
+      "bytes": 266365
+    },
+    {
+      "name": "02_High_Priestess.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/02_High_Priestess.jpg",
+      "bytes": 288412
+    },
+    {
+      "name": "03_Empress.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/03_Empress.jpg",
+      "bytes": 336738
+    },
+    {
+      "name": "04_Emperor.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/04_Emperor.jpg",
+      "bytes": 328283
+    },
+    {
+      "name": "05_Hierophant.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/05_Hierophant.jpg",
+      "bytes": 317621
+    },
+    {
+      "name": "06_Lovers.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/06_Lovers.jpg",
+      "bytes": 349015
+    },
+    {
+      "name": "07_Chariot.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/07_Chariot.jpg",
+      "bytes": 304286
+    },
+    {
+      "name": "08_Strength.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/08_Strength.jpg",
+      "bytes": 257176
+    },
+    {
+      "name": "09_Hermit.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/09_Hermit.jpg",
+      "bytes": 186693
+    },
+    {
+      "name": "10_Wheel_of_Fortune.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/10_Wheel_of_Fortune.jpg",
+      "bytes": 310812
+    },
+    {
+      "name": "11_Justice.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/11_Justice.jpg",
+      "bytes": 305189
+    },
+    {
+      "name": "12_Hanged_Man.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/12_Hanged_Man.jpg",
+      "bytes": 270785
+    },
+    {
+      "name": "13_Death.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/13_Death.jpg",
+      "bytes": 329074
+    },
+    {
+      "name": "14_Temperance.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/14_Temperance.jpg",
+      "bytes": 343595
+    },
+    {
+      "name": "15_Devil.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/15_Devil.jpg",
+      "bytes": 243760
+    },
+    {
+      "name": "16_Tower.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/16_Tower.jpg",
+      "bytes": 228184
+    },
+    {
+      "name": "17_Star.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/17_Star.jpg",
+      "bytes": 281514
+    },
+    {
+      "name": "18_Moon.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/18_Moon.jpg",
+      "bytes": 284800
+    },
+    {
+      "name": "19_Sun.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/19_Sun.jpg",
+      "bytes": 325580
+    },
+    {
+      "name": "20_Judgement.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/20_Judgement.jpg",
+      "bytes": 323313
+    },
+    {
+      "name": "21_World.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/21_World.jpg",
+      "bytes": 312842
+    },
+    {
+      "name": "Cups01.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Cups01.jpg",
+      "bytes": 280844
+    },
+    {
+      "name": "Cups02.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Cups02.jpg",
+      "bytes": 291860
+    },
+    {
+      "name": "Cups03.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Cups03.jpg",
+      "bytes": 287367
+    },
+    {
+      "name": "Cups04.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Cups04.jpg",
+      "bytes": 257041
+    },
+    {
+      "name": "Cups05.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Cups05.jpg",
+      "bytes": 175174
+    },
+    {
+      "name": "Cups06.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Cups06.jpg",
+      "bytes": 337660
+    },
+    {
+      "name": "Cups07.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Cups07.jpg",
+      "bytes": 259851
+    },
+    {
+      "name": "Cups08.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Cups08.jpg",
+      "bytes": 251703
+    },
+    {
+      "name": "Cups09.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Cups09.jpg",
+      "bytes": 288290
+    },
+    {
+      "name": "Cups10.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Cups10.jpg",
+      "bytes": 315448
+    },
+    {
+      "name": "Cups11.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Cups11.jpg",
+      "bytes": 293622
+    },
+    {
+      "name": "Cups12.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Cups12.jpg",
+      "bytes": 306248
+    },
+    {
+      "name": "Cups13.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Cups13.jpg",
+      "bytes": 293613
+    },
+    {
+      "name": "Cups14.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Cups14.jpg",
+      "bytes": 293025
+    },
+    {
+      "name": "Pents01.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Pents01.jpg",
+      "bytes": 259989
+    },
+    {
+      "name": "Pents02.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Pents02.jpg",
+      "bytes": 268283
+    },
+    {
+      "name": "Pents03.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Pents03.jpg",
+      "bytes": 305883
+    },
+    {
+      "name": "Pents04.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Pents04.jpg",
+      "bytes": 240576
+    },
+    {
+      "name": "Pents05.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Pents05.jpg",
+      "bytes": 314759
+    },
+    {
+      "name": "Pents06.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Pents06.jpg",
+      "bytes": 276929
+    },
+    {
+      "name": "Pents07.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Pents07.jpg",
+      "bytes": 297129
+    },
+    {
+      "name": "Pents08.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Pents08.jpg",
+      "bytes": 251427
+    },
+    {
+      "name": "Pents09.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Pents09.jpg",
+      "bytes": 286620
+    },
+    {
+      "name": "Pents10.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Pents10.jpg",
+      "bytes": 336462
+    },
+    {
+      "name": "Pents11.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Pents11.jpg",
+      "bytes": 228968
+    },
+    {
+      "name": "Pents12.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Pents12.jpg",
+      "bytes": 224862
+    },
+    {
+      "name": "Pents13.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Pents13.jpg",
+      "bytes": 343884
+    },
+    {
+      "name": "Pents14.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Pents14.jpg",
+      "bytes": 285355
+    },
+    {
+      "name": "Swords01.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Swords01.jpg",
+      "bytes": 260056
+    },
+    {
+      "name": "Swords02.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Swords02.jpg",
+      "bytes": 231825
+    },
+    {
+      "name": "Swords03.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Swords03.jpg",
+      "bytes": 192742
+    },
+    {
+      "name": "Swords04.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Swords04.jpg",
+      "bytes": 260114
+    },
+    {
+      "name": "Swords05.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Swords05.jpg",
+      "bytes": 282587
+    },
+    {
+      "name": "Swords06.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Swords06.jpg",
+      "bytes": 295835
+    },
+    {
+      "name": "Swords07.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Swords07.jpg",
+      "bytes": 255004
+    },
+    {
+      "name": "Swords08.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Swords08.jpg",
+      "bytes": 294985
+    },
+    {
+      "name": "Swords09.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Swords09.jpg",
+      "bytes": 241730
+    },
+    {
+      "name": "Swords10.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Swords10.jpg",
+      "bytes": 226553
+    },
+    {
+      "name": "Swords11.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Swords11.jpg",
+      "bytes": 272808
+    },
+    {
+      "name": "Swords12.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Swords12.jpg",
+      "bytes": 278401
+    },
+    {
+      "name": "Swords13.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Swords13.jpg",
+      "bytes": 268838
+    },
+    {
+      "name": "Swords14.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Swords14.jpg",
+      "bytes": 306862
+    },
+    {
+      "name": "Wands01.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Wands01.jpg",
+      "bytes": 260089
+    },
+    {
+      "name": "Wands02.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Wands02.jpg",
+      "bytes": 255310
+    },
+    {
+      "name": "Wands03.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Wands03.jpg",
+      "bytes": 257196
+    },
+    {
+      "name": "Wands04.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Wands04.jpg",
+      "bytes": 250749
+    },
+    {
+      "name": "Wands05.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Wands05.jpg",
+      "bytes": 256229
+    },
+    {
+      "name": "Wands06.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Wands06.jpg",
+      "bytes": 269114
+    },
+    {
+      "name": "Wands07.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Wands07.jpg",
+      "bytes": 242496
+    },
+    {
+      "name": "Wands08.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Wands08.jpg",
+      "bytes": 234753
+    },
+    {
+      "name": "Wands09.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Wands09.jpg",
+      "bytes": 296076
+    },
+    {
+      "name": "Wands10.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Wands10.jpg",
+      "bytes": 274995
+    },
+    {
+      "name": "Wands11.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Wands11.jpg",
+      "bytes": 298142
+    },
+    {
+      "name": "Wands12.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Wands12.jpg",
+      "bytes": 331476
+    },
+    {
+      "name": "Wands13.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Wands13.jpg",
+      "bytes": 338300
+    },
+    {
+      "name": "Wands14.jpg",
+      "source": "https://raw.githubusercontent.com/mixvlad/TarotCards/main/tarot/rider-waite/720px/Wands14.jpg",
+      "bytes": 340993
+    }
+  ]
+}
