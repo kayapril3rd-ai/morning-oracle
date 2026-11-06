@@ -5075,7 +5075,7 @@ const has=(p,key)=>signals[key].has(code(p));
 const oneOf=(p,...keys)=>keys.some(key=>has(p,key));
 const fixed=(key,text,body='')=>({key,text,body});
 function pick(positions,role){return positions.find(p=>p.slot.role===role);}
-function choose(record,positions,crush=false){
+function chooseStory(record,positions,crush=false){
  const id=record.spreadId;
  if(crush){
   const feel=positions[id==='relationship'?1:0],fear=positions[id==='relationship'?2:1],next=positions[id==='relationship'?3:2];
@@ -5141,7 +5141,105 @@ function choose(record,positions,crush=false){
  }
  return fixed('card-'+code(current),V[current.card.id][current.pick.reversed?'R':'U'].summary);
 }
-return {choose,signals};
+// A question about affection is different from a question about an action or a result.
+// These are meaning-specific sets, never a good/bad-card score or a reversal count.
+const questionSignals={
+ affection:'3U 6U 14U 17U 19U 22U 25U 33U 36U 37U 38U 41U 45U 46U 47U 48U 49U',
+ withdrawn:'9U 9R 39U 43U 49R 53U 53R',
+ initiative:'1U 7U 22U 29U 33U 46U 47U 61U',
+ pause:'9U 9R 12U 12R 22R 29R 39U 43U 49R 51U 53U 53R 57U 75R',
+ gradual:'14U 23U 28U 30U 64U 70U 74U 75U',
+ erratic:'0R 7R 33R 46R 47R 61R',
+ reciprocal:'6U 14U 25U 37U 45U 73U',
+ repair:'14U 17U 20U 37U 38U 52R 54R 68R',
+ separating:'13U 15R 16U 37R 43U 49R',
+ recognition:'19U 20U 21U 27U 50U 64U 66U',
+ setback:'16U 21R 27R 50R 57U 59U 64R 66R 68U 71R',
+ pending:'2U 2R 12U 12R 51U 70U 70R',
+ workFit:'1U 3U 4U 8U 17U 19U 21U 66U 71U 72U 75U 76U 77U',
+ workStrain:'7R 14R 30R 31U 31R 59U 65R 66R 69R 71R 73R 76R 77R'
+};
+for(const key in questionSignals)questionSignals[key]=new Set(questionSignals[key].split(' '));
+const qHas=(p,key)=>questionSignals[key].has(code(p));
+function questionIntent(question,crush=false){
+ const q=(String(question||'').trim().match(/^[^？?。\n]*[？?。]?/)||[''])[0];
+ if(!q)return null;
+ // Do not turn a request for advice, an open question, or quoted past speech into yes/no.
+ if(/怎么|如何|为什么|为何|何时|什么时候|多久|怎样|what\b|why\b|how\b|when\b/i.test(q))return null;
+ const polar=/[吗嘛么？?]|会不会|能不能|要不要|该不该|是不是|是否|喜不喜欢|爱不爱|适不适合|有没有|能否|可否|好不好|行不行|成不成|对不对|\b(?:will|does|do|is|are|can|should)\b/i.test(q);
+ if(!polar)return null;
+ if(crush){
+  if(/复合|和好|重归于好|重新在一起|再在一起|\b(?:reconcile|reconciliation|get back together)\b/i.test(q))return {kind:'reunion'};
+  if(/主动|联系|回我|回复|找我|发消息|约我|\b(?:contact|text|reach out|message|first move|ask me out)\b/i.test(q))return {kind:'initiative'};
+  if(/在一起|交往|确定关系|脱单|恋人|\b(?:be together|relationship|date me)\b/i.test(q))return {kind:'commitment'};
+  if(/喜欢|好感|在意|爱我|爱不爱|心动|想我|有意思|\b(?:like|love|into me|feelings for me|miss me)\b/i.test(q))return {kind:'affection'};
+ }
+ if(/适合|合适|适不适合|\b(?:suit|right for me|good fit)\b/i.test(q)&&/工作|岗位|职业|公司|offer|job|career/i.test(q))return {kind:'fit'};
+ if(/通过|考上|考过|录取|合格|及格|过关|(?:拿到|收到|获得).{0,6}offer|(?:面试|考试).{0,6}失败|面试.{0,6}(成功|顺利|过)|考试.{0,6}(成功|顺利|过)|\b(?:pass|accepted|admitted)\b/i.test(q))return {kind:'outcome',event:/面试|interview|offer/i.test(q)?'interview':/考试|考上|考过|考研|考公|及格|exam|test/i.test(q)?'exam':/录取|admitted|accepted/i.test(q)?'admission':'approval'};
+ if(/成功|顺利|做成|达成|实现|有结果|能成|成不成|\b(?:succeed|work out|successful)\b/i.test(q))return {kind:'outcome',event:'event'};
+ return null;
+}
+function questionReading(record,positions,crush){
+ const intent=questionIntent(record.question,crush);
+ if(!intent||record.spreadId==='choice')return null;
+ const id=record.spreadId;
+ // Outcome evidence must really occupy a future/outcome position. Advice is never a prediction.
+ const feel=crush?positions[id==='relationship'?1:0]:null;
+ const future=crush?(id==='daily'?null:positions[id==='relationship'?3:2]):pick(positions,'trend');
+ const current=positions[0];
+ const source=(p)=>`「${p.voice.label} · ${p.card.name}${p.pick.reversed?'逆位':''}」`;
+ const answer=(direction,text,body,evidence)=>({...fixed('question-'+intent.kind+'-'+direction,text,body),question:{...intent,direction,evidence:evidence.filter(Boolean).map(p=>({index:p.index,cardId:p.card.id,reversed:p.pick.reversed,label:p.voice.label}))}});
+ if(intent.kind==='affection'){
+  if(code(feel)==='6R')return answer('mixed','TA 对你未必没有吸引，可这份感情里还有犹豫和不一致，眼下还不能把它读成明确而稳定的喜欢。',`${source(feel)}落在感受的位置，恋人的吸引仍是理解它的一部分，逆位却让选择、期待或相处方式难以合到一起；所以这一问有牵动，却还谈不上心意已经确定。`,[feel]);
+  if(code(feel)==='15U')return answer('mixed','TA 对你有被吸引或放不下的倾向，可这份牵动也混着欲望和不安，还不能把强烈的吸引直接当成愿意认真经营的喜欢。',`${source(feel)}强调的是强烈的牵引、欲望或依附，感受可能很浓，但和温柔、尊重以及承诺并不自动相同。`,[feel]);
+  if(code(feel)==='2U'||code(feel)==='2R')return answer('unclear','TA 喜不喜欢你，牌面暂时没有把心意说开，沉默里确实留着没被看见的部分，却还不足以读成藏着喜欢。',`${source(feel)}落在感受的位置，信息未显、保留和直觉的意味更强；这一问里，防备或安静本身并不能证明喜欢。`,[feel]);
+  if(code(feel)==='18U'||code(feel)==='42U')return answer('unclear','TA 喜不喜欢你，牌面眼下仍像隔着一层雾，有期待也有想象，还没有足够清楚的感受能让这一问落定。',`${source(feel)}落在感受的位置，想象、不安或投射占的分量比较重，所以眼下最难分清的正是心动和猜测。`,[feel]);
+  if(code(feel)==='51U')return answer('unclear','TA 对这段关系还在犹豫，心里有暂时不愿面对的部分，眼下还没有走到能明确说喜欢你的那一步。',`${source(feel)}落在感受的位置，宝剑二的闭眼与交叉双剑更像是在暂缓决定；它没有把这一问推向清楚的喜欢，也没有替 TA 作出否定。`,[feel]);
+  if(qHas(feel,'affection'))return answer('leaning-yes','从牌面看，TA 对你是偏有好感的，只是这份喜欢能走到哪一步，还要和之后的行动分开看。',`${source(feel)}放在感受的位置，亲近、欣赏或心动的意味更明显，所以问喜不喜欢，答案偏向有；后面的牌说的是顾虑和发展，不会把这份好感自动变成承诺。`,[feel]);
+  if(qHas(feel,'withdrawn'))return answer('leaning-no','问 TA 现在有没有想靠近你的喜欢，牌面暂时偏向没有明显表现，更多是把注意力留在自己那里。',`${source(feel)}落在感受的位置，退开、独处或情绪收回的意味更强，所以眼下很难把它读成积极的喜欢，这也没有替 TA 往后的感受下定论。`,[feel]);
+  if(has(feel,'guarded'))return answer('unclear','TA 喜不喜欢你，牌面还没有说得很清楚，眼下保护自己和保持距离的意味更重，防备本身却还不能当成藏着喜欢。',`${source(feel)}落在感受的位置，守住边界、保留距离的意味更明显；这一问暂时看得到保留，却还没有足够的亲近来确认心动。`,[feel]);
+  return answer('unclear','TA 喜不喜欢你，这组牌还没有给出清楚的倾向，眼下的感受还不够明朗，暂时不能把它说成确定的心动。',`${source(feel)}说到了相处中的感受，却没有足够明确的亲近意味；这里还无法单凭这一张牌，把关系里的在意、压力或保留判成爱情。`,[feel]);
+ }
+ if(intent.kind==='initiative'){
+  const p=future||feel;
+  if(!future)return answer('unclear','TA 会不会主动联系你，单看这张牌还不能说定，它照见的是眼下的态度，还没有展开到之后的行动。',`${source(p)}可以帮助理解目前的相处，但单张日引没有单独的行动走向，不能把此刻的心动或犹豫直接说成一定会联系。`,[p]);
+  if(qHas(p,'pause'))return answer('leaning-no','问 TA 会不会主动，牌面眼下偏向暂时不会有明显动作，即使有感受，也还没有走到主动联系这一步。',`${source(p)}落在后续的位置，停顿、退开或犹豫的意味更明显；前面的感受牌即便有好感，也不能替后面的行动牌作答。`,[feel,p]);
+  if(qHas(p,'initiative'))return answer('leaning-yes','问 TA 会不会主动，牌面偏向会有靠近或联系的动作，至于会不会把关系说清楚，还没有走到那一步。',`${source(p)}落在后续的位置，有发起、传递消息或向前靠近的意味，所以这一问偏向会；主动来往和愿意确定关系，仍是两件事。`,[feel,p]);
+  if(qHas(p,'gradual'))return answer('slow','TA 有慢慢靠近的倾向，可这组牌的节奏很谨慎，还不像很快就会主动把话说开。',`${source(p)}落在后续的位置，强调耐心、观察或稳定的小步投入；它支持缓慢的靠近，却不能换算成某一天一定会收到消息。`,[feel,p]);
+  if(qHas(p,'erratic'))return answer('mixed','TA 有可能突然主动一下，可后面的持续性还不稳，这组牌更像一时靠近，暂时不像稳定地推进关系。',`${source(p)}落在后续的位置，行动里带着冲动、迟疑或反复，所以“可能会联系”和“会一直主动”不能当成同一个答案。`,[feel,p]);
+  return answer('unclear','TA 会不会主动，这组牌暂时看不出足够明确的动作，有好感或有牵挂，也还不能算作会来联系。',`${source(p)}是这一问要看的后续位置，但它没有明确的发起或联系意味；单凭前面的感受，很容易把心动读成已经准备行动。`,[feel,p]);
+ }
+ if(intent.kind==='reunion'||intent.kind==='commitment'){
+  const reunion=intent.kind==='reunion',p=future;
+  if(!p)return answer('unclear',reunion?'你们能不能复合，单张牌还没有展开到双方重新走到一起的过程，眼下不足以给出明确的是或否。':'你们能不能在一起，单张牌还没有展开到双方的回应与后续，眼下不足以给出明确的是或否。',`${source(feel)}说的是此刻的态度，还没有分别看到双方意愿和关系走向。`,[feel]);
+  if(qHas(p,reunion?'repair':'reciprocal'))return answer('leaning-yes',reunion?'从牌面看，你们有重新靠近、修复关系的机会，只是这份机会还要经过双方的回应，才会真正走到复合。':'从牌面看，你们有往恋人关系发展的机会，亲近已经有了相互回应的意味，只是还不能把它当成已经确定关系。',`${source(p)}落在关系后续的位置，${reunion?'缓和、重启或重新连接':'相互选择、协调或共同经营'}的意味比较清楚，所以这一问偏向有机会，前面未解决的部分仍然在影响过程。`,[feel,p]);
+  if(qHas(p,'separating')||qHas(p,'pause'))return answer('leaning-no',reunion?'问能不能复合，牌面目前偏向还走不到那一步，退开或停住的意味更明显，留恋也还没有变成重新在一起的行动。':'问能不能在一起，牌面目前偏向还走不到那一步，关系里仍有退开或停住的部分，靠近的心情还没有变成双方一致的选择。',`${source(p)}落在后续的位置，显示的仍是距离、结束旧阶段或停顿；${source(feel)}即便有感情，也不能抵消这个走向。`,[feel,p]);
+  return answer('unclear',reunion?'你们之间还有值得留意的牵连，可会不会复合，这组牌暂时没有显出双方一起回头的明确方向。':'你们之间有可以继续理解的部分，可会不会在一起，这组牌暂时没有显出双方一起确定关系的明确方向。',`${source(p)}谈到了关系后续，但还不足以读成双方会作出相同选择，感受、靠近和承诺在这里仍需要分开。`,[feel,p]);
+ }
+ if(intent.kind==='fit'){
+  const challenge=pick(positions,'challenge');
+  if(qHas(current,'workStrain')||(challenge&&qHas(challenge,'workStrain')))return answer('strained','问这份工作适不适合你，牌面更像是在说目前做起来有些勉强，投入和能得到的支持还没有很好地合在一起。',`${source(current)}说的是你置身其中的状态${challenge?'，'+source(challenge)+'则指出吃力的地方':''}；这里读到的是当下的匹配和负担，还不足以评定这份工作长期一定适合或不适合。`,[current,challenge]);
+  if(qHas(current,'workFit'))return answer('leaning-yes','问这份工作适不适合你，牌面偏向有能发挥所长、继续积累的空间，眼下的匹配感比勉强感更明显。',`${source(current)}放在你的状态，带着能力可以发挥、已有经验可以继续生长的意味；这回答的是你与工作目前的相处，并不等于薪资、制度和团队条件都已经合适。`,[current]);
+  return answer('unclear','这份工作适不适合你，牌面暂时还没有偏向很明确的一边，眼下的状态和长期能不能做得舒服，还不能画上等号。',`${source(current)}能说明你眼下的感受，但这还不足以替代工作内容、支持和回报是否匹配的判断。`,[current]);
+ }
+ if(intent.kind==='outcome'){
+  const text={
+   interview:{yes:'问这次面试能不能通过，牌面偏向有希望，后续有被看见、得到认可的意味，但录用还要等实际通知。',no:'问这次面试能不能通过，牌面目前偏向不太顺利，后续仍有阻碍或落差，眼下还不像已经拿到了认可。',pending:'这次面试能不能通过，牌面暂时还悬着，后续更像在等待评估，还没有落到明确的通过或不通过。',unknown:'这次面试能不能通过，牌面还没有给出清楚的结果倾向，准备得怎样和最后是否被录用，在这里还不能当成一回事。',missing:'这次面试能不能通过，这副牌目前看到的是你的状态和应对，还没有单独的结果牌，不能把准备状态当成录用答案。'},
+   exam:{yes:'问这次考试能不能通过，牌面偏向有希望，后续有成果被确认的意味，不过是否合格还要以成绩为准。',no:'问这次考试能不能通过，牌面目前偏向不太顺利，后续仍有阻碍或落差，还没有显出稳稳过关的样子。',pending:'这次考试能不能通过，牌面暂时还悬着，后续更像在等待评定，还没有落到明确的通过或不通过。',unknown:'这次考试能不能通过，牌面还没有给出清楚的结果倾向，投入和成绩之间仍有不能直接画等号的部分。',missing:'这次考试能不能通过，这副牌目前看到的是状态和应对，还没有单独的结果牌，不能把努力或担心直接当成成绩。'},
+   admission:{yes:'问能不能被录取，牌面偏向有希望，后续有机会得到确认和回应，只是还不能当成已经收到录取通知。',no:'问能不能被录取，牌面目前偏向不太顺利，后续仍有阻碍或落差，尚未显出明确的接纳。',pending:'能不能被录取，牌面暂时还悬着，后续更像仍在等待评估，还没有落到确定的结果。',unknown:'能不能被录取，牌面还没有给出清楚的结果倾向，眼下有机会和最后被选中之间仍留着距离。',missing:'能不能被录取，这副牌目前看到的是状态和应对，还没有单独的结果牌，不能把准备状态当成录取答案。'},
+   approval:{yes:'问能不能通过，牌面偏向有希望，后续有得到认可或机会落实的意味，但最后还要等实际确认。',no:'问能不能通过，牌面目前偏向不太顺利，后续仍有阻碍或落差，眼下还不像已经得到认可。',pending:'能不能通过，牌面暂时还悬着，后续更像在等待评估，还没有落到确定的结果。',unknown:'能不能通过，牌面还没有给出清楚的结果倾向，眼下的进展还不足以当成最后的确认。',missing:'能不能通过，这副牌目前看到的是状态和应对，还没有单独的结果牌，不能把眼下的情况当成最后的答案。'},
+   event:{yes:'问这件事能不能成，牌面偏向有希望，后续有成果被看见或机会落实的意味，不过仍要经过现实中的确认。',no:'问这件事能不能成，牌面目前偏向不太顺利，后续仍有阻碍或落差，离真正做成还有一段距离。',pending:'这件事能不能成，牌面暂时还悬着，后续更像仍在等待条件成熟，还没有落到确定的结果。',unknown:'这件事能不能成，牌面还没有给出清楚的结果倾向，眼下的状态和最终能否实现，还不能当成同一个答案。',missing:'这件事能不能成，这副牌目前看到的是状态和应对，还没有单独的结果牌，不能把眼下的情况当成最终的答案。'}
+  }[intent.event];
+  if(!future)return answer('unresolved',text.missing,`${source(current)}放在当前状态，${positions.length>1?'最后一张仍是怎么回应这件事，并没有另设后续结果':'单张日引也没有展开后续结果'}；它更适合看清眼下的处境，暂时还读不到最终的答复。`,[current]);
+  const direction=qHas(future,'recognition')?'yes':qHas(future,'setback')?'no':qHas(future,'pending')?'pending':'unknown';
+  const body={yes:'有成果显现、得到认可或机会落实的意味，所以这一问偏向有希望；前面的阻碍仍在，走向变好也还需要经过这些过程。',no:'阻碍、落差或条件不足的意味更明显，所以这一问目前偏向不顺；这描述的是当前走向，没有把一次不顺写成永远做不成。',pending:'等待、观察或评估的意味更强，所以这里读成结果未定，而不会把等待自动解释为失败。',unknown:'没有给出足够明确的认可或受阻方向，所以这一问保留不确定，不用前面的自信或担忧凑出一个结果。'}[direction];
+  return answer(direction,text[direction],`${source(future)}落在后续结果的位置，${body}`,[future]);
+ }
+ return null;
+}
+
+function choose(record,positions,crush=false){return questionReading(record,positions,crush)||chooseStory(record,positions,crush);}
+return {choose,signals,questionIntent};
 });
 
 </script><script>
@@ -5243,12 +5341,12 @@ function pairReading(a,b){
 // All spread names and labels follow the same story-oriented wording.
 const VOICE_LABELS={daily:['今天的主线'],guidance:['你现在的状态','卡住你的地方','怎么做'],work:['你现在的状态','你能用上的','卡住你的地方','怎么做','接下来的方向'],relationship:['你这边','对方那边','你们之间','你心里真正想要的','你可以怎么做'],choice:['你现在的处境','A · 走起来什么样','A · 要付出什么','A · 接下来的方向','B · 走起来什么样','B · 要付出什么','B · 接下来的方向'],celtic:['你现在的处境','卡住你的地方','你想要的结果','事情的根子','之前发生的','正在靠近的变化','你现在的做法','身边的人和环境','你盼的和怕的','接下来的方向']};
 Object.entries(VOICE_LABELS).forEach(([id,labels])=>SPREADS[id].slots.forEach((s,i)=>s.label=labels[i]));
-const CRUSH_RE=/喜欢我|喜不喜欢|crush|暧昧|暗恋|心动|好感|表白|告白|脱单|桃花|复合|前任|前男友|前女友|想我|在意我|爱不爱|对我.{0,4}(感觉|想法|意思|印象|态度|上心)|(他|她|ta).{0,6}(主动|联系我|回我|找我|爱我|追我)|男朋友|女朋友|追我|追他|追她|约会|正缘|喜欢的人|(?:我们|我和他|我和她).{0,8}在一起/i;
-const EXPLICIT_ROMANCE=/crush|暧昧|暗恋|表白|告白|脱单|桃花|复合|前任|前男友|前女友|男朋友|女朋友|正缘|约会|喜欢的人|心动/i;
+const CRUSH_RE=/喜欢我|喜不喜欢|对我有意思|对我有没有意思|crush|暧昧|暗恋|心动|好感|表白|告白|脱单|桃花|复合|前任|前男友|前女友|想我|在意我|爱不爱|对我.{0,4}(感觉|想法|意思|印象|态度|上心)|(他|她|ta).{0,6}(主动|联系我|回我|找我|爱我|追我)|男朋友|女朋友|追我|追他|追她|约会|正缘|喜欢的人|(?:我们|我和他|我和她).{0,8}在一起/i;
+const EXPLICIT_ROMANCE=/\b(?:does (?:he|she) (?:like|love) me|will (?:he|she) (?:text|contact|message|reach out)|is (?:he|she) into me)\b|crush|暧昧|暗恋|表白|告白|脱单|桃花|复合|前任|前男友|前女友|男朋友|女朋友|正缘|约会|喜欢的人|心动/i;
 const NON_ROMANTIC_CONTEXT=/方案|设计|作品|项目|评审|面试|客户|甲方|绩效|工作|合作|产品|提案|论文|导师|招聘|求职|资料|实验|数组|命名|代码|模型|课程|作业/;
 const CRUSH_SPREADS=new Set(['daily','guidance','relationship']);
 function isCrushQuestion(q){const text=String(q||'');if(EXPLICIT_ROMANCE.test(text))return true;if(NON_ROMANTIC_CONTEXT.test(text))return false;return CRUSH_RE.test(text);}
-function pronounFor(q){const t=String(q||'').replace(/其他|其它/g,'');const he=t.includes('他'),she=t.includes('她');return he&&!she?'他':she&&!he?'她':'TA';}
+function pronounFor(q){const t=String(q||'').replace(/其他|其它/g,'');const he=t.includes('他')||/\bhe\b/i.test(t),she=t.includes('她')||/\bshe\b/i.test(t);return he&&!she?'他':she&&!he?'她':'TA';}
 function isCrushReading(record){return CRUSH_SPREADS.has(record.spreadId)&&isCrushQuestion(record.question);}
 function readingLabels(record){
  let labels=isCrushReading(record)?{daily:['TA 对你的感觉'],guidance:['TA 对你的感觉','TA 心里的顾虑','你们接下来'],relationship:['你这边','TA 对你的感觉','TA 心里的顾虑','你们接下来','你可以怎么做']}[record.spreadId]:VOICE_LABELS[record.spreadId];
@@ -5273,7 +5371,7 @@ function buildCrushReading(record,spread,positions){
  const overview=narrativeOverview(positions,story,swap);
  overview.push({title:'牌面联想 · '+swap('TA 想说的话'),text:swap(`“${D[feelIdx].crush.words}”`),quote:true});
  const adviceIdx=spread.id==='relationship'?4:feelIdx;
- return {spread,positions,overview,verdict:swap(story.text),storyKey:story.key,voice:true,crush:true,actionTitle:'如果想回应这组牌',note:swap('这是牌面联想，不是 TA 的真实表态。最后怎么看，还是要以实际相处为准。'),pairs:[],actions:[positions[adviceIdx].practice],psychology:G.psychology({...record,focus:'relationship'},positions),counts:{},reversed:positions.filter(p=>p.pick.reversed).length,courts:0};
+ return {spread,positions,overview,verdict:swap(story.text),storyKey:story.key,questionAnswer:story.question||null,voice:true,crush:true,actionTitle:'如果想回应这组牌',note:swap('这是牌面联想，不是 TA 的真实表态。最后怎么看，还是要以实际相处为准。'),pairs:[],actions:[positions[adviceIdx].practice],psychology:G.psychology({...record,focus:'relationship'},positions),counts:{},reversed:positions.filter(p=>p.pick.reversed).length,courts:0};
 }
 function buildVoiceReading(record,spread,positions){
  if(isCrushReading(record))return buildCrushReading(record,spread,positions);
@@ -5286,7 +5384,7 @@ function buildVoiceReading(record,spread,positions){
  });
  const story=S.choose(record,positions),overview=narrativeOverview(positions,story);
  const advice=positions.find(p=>p.slot.role==='advice')||positions[0];
- return {spread,positions,overview,verdict:story.text,storyKey:story.key,voice:true,pairs:[],actionTitle:'如果想回应这组牌',actions:[advice.practice],psychology:G.psychology(record,positions),counts:{},reversed:positions.filter(p=>p.pick.reversed).length,courts:0};
+ return {spread,positions,overview,verdict:story.text,storyKey:story.key,questionAnswer:story.question||null,voice:true,pairs:[],actionTitle:'如果想回应这组牌',actions:[advice.practice],psychology:G.psychology(record,positions),counts:{},reversed:positions.filter(p=>p.pick.reversed).length,courts:0};
 }
 function buildReading(record,cards,depth){
  const spread=SPREADS[record.spreadId];if(!spread||record.picks.length!==spread.count)throw new Error('Spread/card count mismatch');
