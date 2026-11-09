@@ -5314,7 +5314,312 @@ function questionReading(record,positions,crush){
  return null;
 }
 
-function choose(record,positions,crush=false){return questionReading(record,positions,crush)||chooseStory(record,positions,crush);}
+// Whole paragraphs are selected by relationships between positions. Only card
+// names are substituted: no voice fields, card summaries or action fragments
+// are concatenated. These editorial themes do not score good/bad cards.
+const GROUP_THEMES=[
+ ['move','pause'],['move','fog'],['guard','fog'],['warm','drain'],['ground','guard'],['ground','shift'],['warm','friction'],['move','friction'],['ground','drain'],['pause','pause'],
+ ['shift','shift'],['clear','friction'],['pause','drain'],['shift','guard'],['repair','friction'],['guard','repair'],['shift','guard'],['repair','drain'],['fog','clear'],['warm','drain'],['clear','pause'],['ground','pause'],
+ ['move','pause'],['pause','guard'],['move','pause'],['warm','friction'],['friction','friction'],['move','drain'],['guard','drain'],['move','pause'],['guard','drain'],['drain','drain'],['move','pause'],['move','friction'],['move','drain'],['move','guard'],
+ ['warm','guard'],['warm','friction'],['warm','drain'],['pause','repair'],['drain','repair'],['warm','shift'],['fog','clear'],['shift','pause'],['ground','drain'],['warm','friction'],['warm','fog'],['warm','friction'],['warm','drain'],['ground','guard'],
+ ['clear','fog'],['pause','clear'],['drain','repair'],['pause','drain'],['friction','repair'],['shift','pause'],['guard','clear'],['pause','repair'],['drain','repair'],['drain','repair'],['fog','fog'],['move','friction'],['clear','guard'],['clear','friction'],
+ ['move','pause'],['ground','drain'],['ground','friction'],['guard','shift'],['drain','repair'],['warm','friction'],['pause','pause'],['ground','pause'],['ground','fog'],['ground','friction'],['move','pause'],['ground','pause'],['warm','drain'],['ground','guard']
+];
+const groupTheme=p=>GROUP_THEMES[p.card.id][p.pick.reversed?1:0];
+const inThemes=(p,...themes)=>themes.includes(groupTheme(p));
+const name=p=>'「'+p.card.name+(p.pick.reversed?'逆位':'')+'」';
+const fillGroup=(text,ps)=>text.replace(/\{([a-e])\}/g,(_,key)=>name(ps[key.charCodeAt(0)-97]));
+function groupResult(key,text,body,ps){return {...fixed(key,fillGroup(text,ps),fillGroup(body,ps)),synthesis:{key,indices:ps.map(p=>p.index),cards:ps.map(code)}};}
+// In the ordinary three-card spread, the middle position is an obstacle.
+// A supportive upright meaning must be read as overuse here, not as a future.
+function obstacle(p){
+ const t=groupTheme(p);
+ if(code(p)==='57U')return 'grip';
+ if(code(p)==='52U'||code(p)==='59U')return 'hurt';
+ if(p.pick.reversed)return {move:'stall',warm:'care',ground:'grip',guard:'grip',fog:'fog',drain:'load',pause:'stall',shift:'change',repair:'hurt',clear:'clarity',friction:'friction'}[t];
+ return {move:'haste',warm:'care',ground:'grip',guard:'grip',fog:'fog',drain:'load',pause:'wait',shift:'change',repair:'wait',clear:'clarity',friction:'friction'}[t];
+}
+const GUIDANCE_PAIRS={
+ recovering:['你已经在慢慢恢复，可重新开始的心情还没变成用得上的力气，眼前的小事也因此显得比平时更费劲。','{a}和{b}连着看，这段迟缓里有之前留下的消耗，也有重新投入时的迟疑。你已经离那段难熬的经历远了一点，恢复和重新出发却没有同时发生，所以会有明明想做、真正开始又很吃力的感觉。'],
+ overextended:['你还在认真撑着这件事，可付出的分量已经超过了眼下能承受的，连停下来都会让你觉得不安心。','{a}与阻碍位的{b}放在一起，让疲惫里多了一层牵挂：事情还重要，别人也可能还需要你，休息便很难只是休息。这里的吃力和一直维持原来投入的方式连在一起，光靠再多一点意志，未必就会轻松。'],
+ impatient:['你心里已经往前走了，事情却还停在需要等待或补足条件的地方，着急和使不上力就这样碰在了一起。','{a}和{b}的节奏没有合上：你已经很想投入，现实中的回应、准备或空间却还没跟上。越在意能不能赶快做成，就越容易把这段迟缓理解成自己做得不够好。'],
+ warmFriction:['你对这件事有感情，也愿意投入，可彼此没有谈拢的地方正在磨掉原本轻松的心情。','把{a}和{b}一起读，能看见在意与分歧互相牵着：正因为这件事值得认真，没被理解的部分才会更让人在意。温柔仍在，委屈却也留在同一段经历里，事情因此很难只用喜欢或不喜欢来解释。'],
+ fogGrip:['你很想把事情弄明白，可越怕失去原来的安稳，越容易围着同样的疑问打转，迟迟放不下。','{a}与{b}连起来，说的是不确定和自我保护怎样互相加重。线索还不够，心里又已经很在意结果，于是每一点变化都容易被放大，判断也很难真正安定下来。'],
+ stableChange:['原来让你安心的安排已经碰到了变化，想保住熟悉的生活和想换一种过法，暂时还没有谈妥。','{a}和{b}之间的张力，在于安稳有它的价值，眼前的变化也确实无法完全放在一边。你牵挂的既有已经建立起来的东西，也有继续照旧时越来越明显的不舒服。'],
+ hesitantHaste:['你心里还有没想清的部分，事情却仿佛催着你赶快往前，犹豫也因此变得更紧张了。','{a}和{b}放在一起，等待里的思量遇上了对速度的要求。一个决定还没有在心里站稳，就已经要承受马上行动的压力，原本可以慢慢分辨的感受也容易挤成一团。'],
+ clearConflict:['你已经看见了一些问题，可怎样把它说清楚、让彼此听进去，还没有和你的判断一起变得明朗。','{a}与{b}的联系落在判断和沟通之间：看得清不等于容易谈拢。越想说明自己的道理，越可能碰到彼此的立场和输赢感，谈话也就离最初想解决的事远了一点。'],
+ care:['你真正在意的东西占了很大分量，连照顾、期待和想把事情做好，也渐渐变成了额外的负担。','在{a}所处的局面里，{b}落到阻碍位，让关心和投入多了一点用力过头的意味。原本想让事情更好，却可能越来越在意别人是否满意、结果是否足够圆满，自己的空间也就慢慢少了。'],
+ grip:['眼前这件事牵动着你的安全感，熟悉的安排给了依靠，也让改变变得格外不容易。','{a}与阻碍位的{b}连着看，守住原有的东西成了理解这段处境的重要部分。越担心一松手就会失去，越难容许一点不同；事情的难处也就和保护自己的方式缠在了一起。'],
+ fog:['眼下最让人费心的，是事情还没有足够明白，感受和想象却已经走在了前面。','{a}和{b}读在一起，眼前的处境被不完整的线索反复牵动。心里已经有了许多解释，它们却还没有同样多的事实来支撑，所以很难真正踏实地投入或放下。'],
+ load:['这件事仍在占用你的心力，可眼下能分给它的精力已经不多，许多难处也因此被放大了。','{a}与{b}连着看，负担开始影响你怎样理解眼前的事。原本只是一个要处理的问题，也可能在持续的消耗里变成对自己的怀疑，事情与人的余力已经很难分开。'],
+ stall:['眼前的事情还没有顺利展开，想法和实际能投入的条件之间留着距离，迟缓也就一直没有过去。','{a}和{b}相遇，眼下的处境碰到了尚未打通的环节。你对它有怎样的心情是一回事，真正能否开始、能否维持又是另一回事；这两边还没合上，便容易反复停在原处。'],
+ friction:['这件事里有几种不同的要求在互相牵扯，即使各自都很认真，放到一起也还没有找到合适的走法。','把{a}和{b}放在同一件事里，分歧就不只是外面的吵闹，也会影响你怎样投入。自己的想法、别人的期待和实际的配合还没有合到一起，事情因此多了一层来回消磨。'],
+ haste:['眼前的事被推进得有些紧，想赶快看见进展的心情，已经开始影响你和它相处的方式。','{a}遇到阻碍位的{b}，速度和结果变得格外显眼。许多需要慢慢形成的东西被催着往前，原本可以分辨的细节便容易被略过去，投入也渐渐带上了紧绷感。'],
+ wait:['这件事里有一段很难跳过去的停顿，等下去有所牵挂，真的往前又还有没准备好的部分。','{a}和{b}连起来，这段等待已经参与了你对事情的判断。停下原本可能带来观察的空间，可等得久了，也容易把尚未确定的部分变成心里反复掂量的负担。'],
+ change:['你现在面对的事已经碰到了原有安排的边缘，变化还没被真正容纳，心里就很难安定下来。','{a}与{b}连着读，旧的做法和眼前的变化还在互相拉扯。熟悉的东西未必一下就能放下，新的处境也没有完全成形，于是向前和留在原处都带着一点不适应。'],
+ hurt:['之前留下的难受还在影响眼前这件事，有些看起来很小的触动，也会碰到心里尚未缓过来的部分。','{a}和{b}放在一起，过去的消耗没有和眼前的生活完全分开。人仍在继续应付，心里却会带着那次经历理解新的动静，所以谨慎、失落和疲惫可能比平时更容易出现。'],
+ clarity:['眼前这件事被放在很严格的标准下衡量，想弄清楚的心情很认真，感受却有些难以被一起听见。','{a}与阻碍位的{b}读在一起，判断和解释占了很大分量。越想找一个完全站得住的答案，越可能忽略处境里尚未能说清的感受，事情也因此一直难以松动。']
+};
+const GUIDANCE_RESPONSE={
+ move:'{c}放在回应的位置，让{a}与{b}之间多了一个重新发起的角度：受阻的处境里仍有尚未用起来的可能，这一张谈的是怎样恢复参与感，后续结果还没有在这副牌里展开。',
+ warm:'回应位的{c}让前两张之间的拉扯有了感情和来往的空间；{a}与{b}谈到的难处，也就和能否被理解、能否有真实回应连在了一起。这里还没有替事情许下结局。',
+ ground:'{c}接在{a}与{b}之后，整组牌的重心落向了能够持续的投入。眼前的困顿和对进展的期待之间，需要容得下实际的时间与条件；最后一张给的是回应的方向，事情是否如愿仍未展开。',
+ guard:'{a}与{b}之间的拉扯，到了回应位的{c}，多了一层关于边界的理解：眼前的处境需要留得住自己的空间，持续用力才不至于变成持续消耗。这里说的是应对方式，未来还没有落定。',
+ fog:'{c}出现在回应的位置，让{a}与{b}之间尚未看清的部分更值得认真对待。这组牌留给眼前的是观察和分辨的空间，贸然给一个结果，反而会越过它真正说到的范围。',
+ drain:'当{c}也落在回应的位置，{a}与{b}之间的问题就多了一层关于承受限度的提醒。眼前的投入能否继续，和已经累积的消耗连在一起；这份重量需要被看见，还没有被写成未来一定会发生的事。',
+ pause:'{c}回应着{a}与{b}之间的紧张，让暂缓也有了意义。整组牌因此更像一段还在消化、尚未准备好继续推进的经历，眼下的安静里仍有变化，只是没有在这里展开成一个结果。',
+ shift:'{c}接在{a}与{b}之后，让这段处境有了重新理解原有安排的意味。有些困难和旧的延续方式有关，最后一张把回应放到了改变之中，变化会带来什么仍留着余地。',
+ repair:'回应位的{c}让{a}与{b}之间多了一点修复的余地：眼前的难处和能否慢慢恢复信任、精力或协调连在一起。这是一种重新相处的方向，尚不能读成事情已经转好。',
+ clear:'{c}与{a}、{b}之间尚未理顺的部分相连，让整组牌更关心事实、表达和彼此承担的分量。回应的方向因此比较清楚，结果却仍需要经过实际的过程。',
+ friction:'回应位的{c}让{a}与{b}之间的不同更难轻轻带过。这组牌谈到了分歧怎样被面对，也谈到了争执的代价；最后一张仍在回应眼前的处境，没有把冲突写成注定的结局。'
+};
+// Rows describe the current experience; columns describe how the obstacle
+// changes that experience. Each cell is an authored relational paragraph.
+const GUIDANCE_CONTEXT={
+ move:[
+  '{a}和{b}连着看，你想开始或推进的心情，遇到了仍未成熟的条件。越期待看见变化，等待就越显眼，原来的兴奋也容易在反复迟缓里变成着急。',
+  '{a}与{b}放在一起，你想往前的劲头碰到了彼此没谈拢的部分。力气还在，方向却未必一致，所以认真投入之后，也可能觉得自己一直在和周围拉扯。',
+  '{a}遇到阻碍位的{b}，新的可能和想把事情做得稳妥的心情牵在一起。越想保证不出差错、让每一头都满意，真正出发时反而越难轻松。',
+  '{a}和{b}之间，想投入的心情还在承受压力与变化。新鲜感可以让人往前，眼前要付出的分量却已经变得具体，兴奋也就和吃力留在了一起。'
+ ],
+ warm:[
+  '{a}与{b}连起来，你很在意这件事，却还没有得到足以安心的回应。关心已经投入了，事情仍停在不明朗的地方，于是越喜欢、越牵挂，也越容易反复想。',
+  '{a}和{b}放在一起，在意碰到了彼此不同的期待。你带着感情投入，一次没说到一起的回应便会更有分量，喜欢里面也慢慢多了一点委屈。',
+  '{a}遇到{b}，关心和想维持美好逐渐靠得太近。事情越重要，越难容许一点不圆满，原本自然的付出也容易变成总要顾好别人的用力。',
+  '{a}与{b}连着看，温柔的投入碰到了现实里的负担。仍然在意，并不表示精力和条件也一样充足，所以心里愿意的部分，有时还无法轻松做到。'
+ ],
+ ground:[
+  '{a}与{b}放在一起，你想把日子和事情踏实地过下去，进展却没有照原来的节奏出现。持续投入和一直等着回应之间，已经开始有了一点落差。',
+  '{a}和{b}连起来，原来能给人安稳的安排碰到了不同的要求。你想把事情维持好，彼此却还没认同同一种做法，熟悉的节奏也就有些被打乱。',
+  '{a}遇到阻碍位的{b}，安稳和不敢改变慢慢贴在了一起。已经建立的东西值得珍惜，可越想把每一处都守好，越容易失去调整的余地。',
+  '{a}和{b}之间，原来扎实的投入已经碰到了承受的分量。事情仍需要时间与照料，眼前的负担却在变化，继续维持原样便开始没有从前那么轻松。'
+ ],
+ guard:[
+  '{a}与{b}连着看，眼前越没有确定的回应，你越难放心把自己交进去。保留本来是为了安心，可线索一直不清楚，保护自己的距离也就一直没有松动。',
+  '{a}和{b}放在一起，想守住自己的心情遇到了外面的分歧。越觉得不被理解，越容易先收起表达，旁人也就更难知道你真正在意什么。',
+  '{a}遇到{b}，保护自己和想掌握局面的心情互相加重。事情还没有失去，心里却已经在防备失去，越用力守着，越难真正松一口气。',
+  '{a}与{b}连起来，你的谨慎仍在承受新的压力。原本留出的距离可以保护自己，可变化和负担没有停下，这份防备便也开始让人觉得累。'
+ ],
+ fog:[
+  '{a}和{b}放在一起，想象遇到了迟迟没有落定的线索。心里已经有很多解释，现实却没有跟上同样多的确认，越等答案，越容易在猜测里来回。',
+  '{a}与{b}连着看，你还没摸清全貌，周围不同的说法就已经挤了进来。判断因此不只受线索影响，也被彼此的立场带着走，想明白一件事反而更费心。',
+  '{a}遇到{b}，没有看清的事又碰到了想把握住的心情。越想确认不会失去、不会弄错，越容易把每一点动静都看得很重，心里也难以安定。',
+  '{a}和{b}之间，不明朗还带上了压力。眼前没答案的部分和已经感到的负担混在一起，人很容易在疲惫的时候，先相信那个最让自己担心的解释。'
+ ],
+ drain:[
+  '{a}与{b}连起来，你已经有些承受不动，事情却还停在需要等、需要想的地方。迟缓没有留下休息的感觉，反倒让那份消耗一直悬在心里。',
+  '{a}和{b}放在一起，已经累了的心情又碰到了分歧。平时还能慢慢讲清楚的事，现在更容易让人受伤，相处和做事也就多了一层来回消磨。',
+  '{a}遇到阻碍位的{b}，疲惫还牵着一份不敢松开的责任。担心自己顾得不够、守得不好，让休息也很难真正安心，消耗便容易一直延续。',
+  '{a}与{b}连着看，眼前的消耗还在承受新的要求。不是每一次都发生了大事，可原本已经不多的余力被继续占用，事情也就越来越难轻松面对。'
+ ],
+ pause:[
+  '{a}和{b}放在一起，停顿里仍有尚未决定或等不到回应的部分。人还没有真正往前，心里却没有跟着休息，于是安静也可能过成了反复掂量。',
+  '{a}与{b}连起来，你原本需要一点想清楚的空间，外面的分歧却让这段停留变得紧张。迟迟没动也就不只是犹豫，还和不知道怎样面对彼此的不同有关。',
+  '{a}遇到{b}，停下来思量和舍不得原来的安排留在了一起。继续与改变各有牵挂，越想做一个完全稳妥的决定，越难真的偏向哪一边。',
+  '{a}和{b}之间，你还需要一点停留，事情却已经带着压力和变化来到面前。心里没准备好的部分与现实的要求碰在一起，便容易既着急、又动不了。'
+ ],
+ shift:[
+  '{a}与{b}连着看，原来的处境已经在变化，新的方向却还没真正展开。留在旧的里面不再完全舒服，走出去又还没有着落，人就容易停在两边之间。',
+  '{a}和{b}放在一起，变化碰到了彼此不同的想法。有人已经想换一种过法，有人仍按原来的方式理解，重新适应的过程也因此多了一层摩擦。',
+  '{a}遇到{b}，局面已经动了，心里却还想保住熟悉的东西。改变和留恋同时存在，让向前这件事带着舍不得，也带着不敢完全放手的紧张。',
+  '{a}与{b}连起来，这段转变并不轻松，旧的东西还没有完全过去，新的负担已经出现。事情在变，人也还在适应，很难马上找到安稳的落脚处。'
+ ],
+ repair:[
+  '{a}和{b}放在一起，你已经有重新恢复的余地，事情却还没有顺畅地接上。心里好了一些，真正投入时仍会迟疑，恢复和重新开始也就没有同时发生。',
+  '{a}与{b}连起来，缓和的心情遇到了尚未谈拢的分歧。你已经不想照原来的方式消耗，可彼此还没有找到新的默契，修复也因此显得走走停停。',
+  '{a}遇到{b}，一边在慢慢松开过去，一边仍担心失去熟悉的保护。重新相信和继续防备留在了同一段经历里，人也就还不能完全放松。',
+  '{a}和{b}之间，恢复的过程仍在承受压力。原来的难处正在松动，余力却还没有一下回来，眼前新的要求也容易让人觉得自己又退回了原处。'
+ ],
+ clear:[
+  '{a}与{b}连着看，你已经理出了一些头绪，事情却还缺少能够往前的条件。心里的判断和现实里的进展没有同步，清楚之后仍然可能需要等待。',
+  '{a}和{b}放在一起，看得明白和谈得拢还隔着一段距离。彼此有自己的立场，越急着证明判断没有错，越容易让原本想解决的问题变成争执。',
+  '{a}遇到阻碍位的{b}，清楚的判断开始碰到过于严格的要求。越希望每一处都说得通，越难容下尚未成形的感受，事情也就不容易松动。',
+  '{a}与{b}连起来，你明白了一些问题，也要面对明白之后带来的压力。看见了事实，不等于马上就有余力承受和调整，心里的决定仍需要经过生活。'
+ ],
+ friction:[
+  '{a}和{b}放在一起，眼前的分歧还没有等来足够清楚的回应。各自的想法仍在，事情却暂时谈不下去，不舒服也就容易一直留到下一次来往里。',
+  '{a}与{b}连着看，不同的要求已经互相碰撞，争过之后又会影响下一次怎样开口。大家都想被听见，关系和事情却容易在反复解释中变得更紧。',
+  '{a}遇到{b}，分歧又碰到了各自不愿退让的部分。原本可以商量的事开始带上守住位置的意味，越觉得不能输，越难再听见对方真正想说什么。',
+  '{a}和{b}之间，摩擦已经开始消耗彼此的余力。压力与变化让人更难耐心表达，一次没说到一起的回应，也容易变成接下来继续较劲的理由。'
+ ]
+};
+const obstacleColumn=t=>['fog','wait','stall'].includes(t)?0:t==='friction'?1:['grip','care','clarity'].includes(t)?2:3;
+function guidanceGroup(record,ps){
+ const [a,b,c]=ps,t=obstacle(b);let key=t;
+ if(inThemes(a,'repair')&&['stall','wait','load'].includes(t))key='recovering';
+ else if(inThemes(a,'drain')&&['grip','care','haste','load'].includes(t))key='overextended';
+ else if(inThemes(a,'move')&&['stall','wait','fog'].includes(t))key='impatient';
+ else if(inThemes(a,'warm')&&t==='friction')key='warmFriction';
+ else if(inThemes(a,'fog')&&['fog','grip'].includes(t))key='fogGrip';
+ else if(inThemes(a,'ground')&&['change','friction'].includes(t))key='stableChange';
+ else if(inThemes(a,'pause')&&t==='haste')key='hesitantHaste';
+ else if(inThemes(a,'clear')&&t==='friction')key='clearConflict';
+ const [lead,body]=GUIDANCE_PAIRS[key];
+ if(key==='recovering'&&groupTheme(c)==='ground')return groupResult('guidance-group-recovering-ground',lead,'{a}与{b}连着看，你已经在从先前的消耗里恢复，重新投入的劲头却还没有回来。{c}让这份迟缓有了更具体的理解：恢复之后的重新开始，需要经过一点点找回熟悉与节奏的过程，很难一下回到从前的状态。三张放在一起，讲的是人已经想往前走，力气和信心却仍在慢慢赶上，最后一张回应的是这个过程，还没有展开未来的结果。',ps);
+ const relationalBody=key===t?GUIDANCE_CONTEXT[groupTheme(a)][obstacleColumn(t)]:body;
+ return groupResult('guidance-group-'+key,lead,relationalBody+'\n\n'+GUIDANCE_RESPONSE[groupTheme(c)],ps);
+}
+const RELATION_PAIRS={
+ closeQuiet:['你想在相处里感到亲近，对方却把更多东西留在心里，关系里的距离也就不只是联系多或少那么简单。','{a}与{b}放在一起，能看见双方表达的分量并不相同：一边更容易把感受带进来往，一边更需要保留空间。越想从回应里确认亲近，安静就越容易被读成冷淡，彼此的节奏也因此更难合上。'],
+ fastSlow:['你们对靠近的节奏还没有同样的准备，一方已经在等着进展，另一方却仍需要停留在自己的空间里。','{a}和{b}的速度差，让相处变成了一边靠近、一边等候。来往因此很容易带上催促和退让的意味，即使没有谁刻意为难谁，双方也未必能从同一次互动里得到同样的安心。'],
+ uncertainQuiet:['你越想弄清楚这段关系，对方的保留就越显眼，没有说开的部分也渐渐占了相处的大半。','{a}与{b}连起来，线索不足和保留距离互相加重。沉默里究竟是什么还没被看见，心里却已经替它准备了许多解释，关系便容易停在猜测多过交谈的地方。'],
+ bothWarm:['你们之间有愿意回应彼此的部分，亲近也有机会在真实的来往里慢慢积累，只是双方在意的细节还需要放在一起看。','{a}和{b}相遇，双方都把感受带进了关系，靠近因此有了来回。这里值得看的是这份在意如何被彼此收到：同样出于关心的话和行动，也可能因为期待不同而有不同的分量。'],
+ bothGuarded:['你们都留着保护自己的空间，想被理解的心情没有消失，可谁都还没有很放心地先走近一点。','{a}与{b}放在一起，距离已经成了双方共同维持的相处方式。彼此的保留会成为对方继续保留的理由，久了便很难分辨，究竟是没有感受，还是感受一直没有机会被好好表达。'],
+ wornOut:['你们的相处里有一份已经累积起来的消耗，回应稍微迟一点、意思差一点，都可能碰到原先没缓过来的地方。','{a}与{b}连起来，眼前的互动还带着各自先前的经历。投入能有多少、别人的好意能不能被收到，都和当时的余力有关，相处的不顺也因此很难只归给某一句话或某一个人。'],
+ contest:['你们都很在意自己有没有被听见，可越想把立场说清楚，越容易把谈话变成彼此防备的来回。','{a}与{b}相遇，分歧会影响双方怎样理解对方的下一句话。原本想说明自己，听起来却可能像在否定别人，关系便容易沿着辩解、反驳和受伤继续循环。'],
+ unequalPace:['你们正用不同的方式对待这段来往，有人更在意感受，有人更在意自己的节奏，关系还没形成同样的默契。','{a}和{b}放在一起，彼此的出发点并不完全相同。同一件小事落到两边，可能一边觉得已经表达了心意，一边却还在等另一种回应，这种差别也参与了你们现在的相处。']
+};
+function relationPair(ps){const [a,b]=ps;
+ if(inThemes(a,'warm')&&inThemes(b,'pause','guard'))return 'closeQuiet';
+ if(inThemes(a,'move')&&inThemes(b,'pause','guard'))return 'fastSlow';
+ if(inThemes(a,'fog')&&inThemes(b,'guard','pause'))return 'uncertainQuiet';
+ if(inThemes(a,'warm')&&inThemes(b,'warm','repair'))return 'bothWarm';
+ if(inThemes(a,'guard','pause')&&inThemes(b,'guard','pause'))return 'bothGuarded';
+ if(inThemes(a,'drain')||inThemes(b,'drain'))return 'wornOut';
+ if(inThemes(a,'friction')||inThemes(b,'friction'))return 'contest';
+ return 'unequalPace';
+}
+const relationStyle=p=>inThemes(p,'move','warm','repair')?'open':inThemes(p,'ground','clear')?'ordered':inThemes(p,'guard','pause','fog')?'inward':'unsettled';
+const RELATION_CONTEXT={
+ 'open-open':'{a}与{b}连起来，双方都在以自己的方式参与这段来往。有人更容易表达，有人还带着重新尝试的心情，彼此能否收到这份愿意，会继续影响关系的温度。',
+ 'open-ordered':'{a}和{b}放在一起，你更容易把心情带进相处，对方却可能更看重实际的安排和清楚的表达。同一份关心便有了不同的样子，你想收到的回应和对方给出的方式还需要互相理解。',
+ 'open-inward':'{a}与{b}连着看，你愿意参与和靠近，对方却仍留着观察、思量或保留的空间。彼此的节奏没有完全合上，一次安静也就容易在你心里留下比对方预想更久的牵挂。',
+ 'open-unsettled':'{a}和{b}相遇，你想让这段来往继续展开，对方却还带着不容易安顿的部分。你的关心未必每次都能被轻松收到，彼此的心情和当时能给出的回应也还没有完全合上。',
+ 'ordered-open':'{a}与{b}放在一起，你比较在意关系能否踏实、清楚地延续，对方更容易把当时的感受带进来往。你期待的可靠和对方表达的温度需要放在一起理解，彼此才不容易错过原本的好意。',
+ 'ordered-ordered':'{a}和{b}连起来，双方都带着自己的标准和安排进入关系。彼此或许能够理解负责与持续的分量，可各自认为理所当然的做法，也还需要在真实相处里慢慢磨合。',
+ 'ordered-inward':'{a}与{b}相遇，你希望从实际的来往里得到一些明白的回应，对方却仍需要保留自己的空间。你以为已经足够清楚的事，对方未必已经准备好表达，安稳和安静便可能有不同的含义。',
+ 'ordered-unsettled':'{a}和{b}放在一起，你想让关系有一个能依靠的安排，对方却还处在不太安定的节奏里。越想把事情安顿好，越容易碰到对方暂时做不到的部分，彼此都可能有不被理解的感觉。',
+ 'inward-open':'{a}与{b}连着看，你还需要观察或独自思量，对方却更容易把想法和感受带到来往中。这样的靠近可以带来温度，也可能让你觉得还来不及回应，关系的距离便需要双方一起适应。',
+ 'inward-ordered':'{a}和{b}放在一起，你心里还有没说清的部分，对方却更倾向于用实际安排或明确判断回应。眼前未必缺少来往，双方对怎样才算被理解，却还没有同样的感受。',
+ 'inward-inward':'{a}与{b}相遇，双方都有一些还没交到对方手里的东西。各自的观察、思量和保护留在心里，真正能够确认彼此的来往却不多，关系也容易被没说出口的部分牵着走。',
+ 'inward-unsettled':'{a}和{b}连起来，你还没准备好充分表达，对方也带着不容易安顿的心情。彼此缺少余力时，沉默可能只是暂时不知道怎样回应，却也很容易在另一边留下疑问。',
+ 'unsettled-open':'{a}与{b}放在一起，你这边还有一些不容易安顿的经历，对方却带着愿意参与的心情靠近。来往里可以有好意，你能不能在当时感受到它，也和心里还剩多少空间有关。',
+ 'unsettled-ordered':'{a}和{b}连着看，你仍在适应眼前不轻松的部分，对方却更重视怎样把事情说清或安排好。对方以为有帮助的回应，可能还没碰到你的感受，关系也因此需要多一点彼此理解。',
+ 'unsettled-inward':'{a}与{b}相遇，你心里还留着不太安稳的部分，对方却把更多东西收在自己的空间里。越期待来往能带来一些回应，安静就越显眼，你的感受也更容易在等待中变重。',
+ 'unsettled-unsettled':'{a}和{b}放在一起，双方都还在适应自己的处境，关系暂时很难给彼此一个完全安定的依靠。每次回应会带着各自当时的状态，来往也就容易一边牵挂、一边觉得费心。'
+};
+const RELATION_DYNAMIC={
+ warm:'{c}落在你们之间，让{a}与{b}的差异仍有被回应的空间。彼此并非只能停在各自的感受里，共同来往中的善意，也会反过来影响双方愿意靠近多少。',
+ ground:'把互动位的{c}和{a}、{b}一起看，这段来往正在形成某种熟悉的安排。它给关系留下了延续的基础，双方也可能逐渐习惯按原来的方式理解彼此。',
+ move:'互动位的{c}让{a}与{b}之间多了正在发生的来往。联系和进展会把彼此的差别带到面前，这段关系也更容易在实际相处中显出双方准备好了多少。',
+ guard:'{c}落在你们之间，把{a}与{b}的相处包在了一层保护里。双方会留意自己交出去多少、会不会受伤，亲近也因此很难只凭其中一方的愿意就自然发生。',
+ fog:'当{c}处在你们之间，{a}与{b}的差异就更容易被猜测填满。双方实际表达的东西还不足以撑起所有想象，一次沉默或一条消息却已经能在心里留下很久。',
+ drain:'{c}落在互动的位置，让{a}与{b}之间的不同渐渐带上了消耗。你们怎样来往会影响彼此还剩多少余力，而疲惫又会反过来让下一次回应变得更难。',
+ pause:'{c}出现在你们之间，让{a}与{b}的关系停在了还没有充分来往的阶段。各自的心情仍在变化，真正能让彼此理解的交谈或行动却暂时不多。',
+ shift:'{c}落在你们之间，让{a}与{b}不能一直照原来的方式相处。有些习惯已经不再合适，关系正在经历重新适应，变化里还留着舍不得和拿不准。',
+ repair:'{c}在互动的位置，让{a}与{b}之间多了一点缓和的余地。过去的经历仍在影响相处，重新理解和重新回应也开始有了位置，关系还在慢慢恢复。',
+ clear:'互动位的{c}把{a}与{b}之间原来含糊的差别带到了面前。话语、事实和彼此愿意承担的部分开始变得重要，靠近也更需要经得起真实来往。',
+ friction:'{c}处在你们之间，让{a}与{b}的不同更容易变成碰撞。一次互动留下的不舒服，会影响下一次双方愿意说多少，关系也因此容易越在意越紧张。'
+};
+const RELATION_RESPONSE={
+ closenessSpace:'期待位的{d}与回应位的{e}之间也有一点距离：你想在这段关系里得到安稳的亲近，回应的位置却留出了独处与边界。前面那种相处还没有同时容下靠近和自在，所以喜欢来往，也可能会觉得累。',
+ closenessTruth:'把期待位的{d}与回应位的{e}放在一起，你想要的亲近需要经得起真实的表达。它和互动位的{c}呼应着：安稳不能只靠彼此猜中，有些期待和分歧也需要在关系里有位置。',
+ clarityCare:'期待位的{d}与你的回应位{e}一起出现，让明确的答案和日常的照顾连在了一起。前面的互动究竟能给你多少安心，也要看说出口的态度能否在真实来往里被感受到。',
+ tiredAction:'{d}与回应位的{e}相遇，你想松一口气，关系里却还有需要面对或重新发起的部分。它和前面的相处连起来，就能理解这份矛盾：仍在意这段关系，也未必有余力继续照旧投入。',
+ changePace:'期待位的{d}与回应位的{e}有着不同的节奏，你盼着关系有所改变，眼前的回应却更重视等待与积累。它们与互动位的{c}放在一起，这段关系离你希望的样子，还隔着真实相处的过程。',
+ move:'{d}与回应位的{e}连起来，你心里的期待碰到了想让来往有所展开的力量。前面的互动也因此不只停在各自的感受里，双方怎样参与，会继续影响期待能否得到回应。',
+ warm:'把{d}与回应位的{e}放回前面的相处，期待和表达感受的方式连在了一起。有些想被理解的部分需要在来往里被彼此收到，关系的温度也会影响双方愿意再靠近多少。',
+ ground:'{d}与回应位的{e}一起出现，让心里的期待落到了日常能否持续相处这件事上。前面呈现的亲近或距离，都会经过具体的时间、照顾和共同安排，才慢慢有了分量。',
+ guard:'{d}与回应位的{e}连起来，你在关系里的期待也碰到了保护自己的需要。互动位的{c}因此多了一层意义：相处能有多近，和双方能不能保有自己的空间连在一起。',
+ fog:'把期待位的{d}与回应位的{e}放在一起，心里想要的和眼前能确认的还没有完全对上。前面的互动容易让想象继续生长，关系也还留着需要慢慢分辨的部分。',
+ drain:'{d}与回应位的{e}放回前面的相处，期待已经碰到了精力和承受力的限度。这段关系怎样来往，会影响你还有多少余力投入，付出本身也需要能被看见。',
+ pause:'{d}与回应位的{e}连起来，心里的期待还需要容得下一段停顿。它和互动位的{c}放在一起，关系里有些东西仍在消化，安静也未必等于彼此已经作出了决定。',
+ shift:'把{d}与回应位的{e}一起读，你的期待和原来的相处方式正在面对变化。前面的互动里，有些习惯已经无法一直延续，双方怎样重新理解彼此，也开始影响这段来往。',
+ repair:'{d}与回应位的{e}连起来，让心里的期待有了慢慢修复的方向。前面的相处仍带着旧事，之后能否出现不同的回应，才会让这份安心逐渐有地方留下。',
+ clear:'把期待位的{d}与回应位的{e}放在一起，你想从关系里得到的东西，也需要经得起真实的表达。它与互动位的{c}相连，说明哪些能商量、哪些需要尊重，已经是相处里绕不开的部分。',
+ friction:'{d}与回应位的{e}一起出现，让你的期待碰到了还没谈拢的分歧。前面的相处里，不舒服会影响下一次的回应，关系也需要容得下彼此不同的立场。'
+};
+function relationResponse(ps){const need=ps[3],response=ps[4];
+ if(inThemes(need,'warm','ground')&&inThemes(response,'guard','pause'))return 'closenessSpace';
+ if(inThemes(need,'warm','ground')&&inThemes(response,'clear','friction'))return 'closenessTruth';
+ if(inThemes(need,'clear')&&inThemes(response,'warm','ground'))return 'clarityCare';
+ if(inThemes(need,'drain','pause')&&inThemes(response,'move','friction'))return 'tiredAction';
+ if(inThemes(need,'move','shift')&&inThemes(response,'ground','pause'))return 'changePace';
+ return groupTheme(response);
+}
+function relationshipGroup(record,ps){
+ const k=relationPair(ps),[lead,body]=RELATION_PAIRS[k];
+ const relationalBody=k==='unequalPace'?RELATION_CONTEXT[relationStyle(ps[0])+'-'+relationStyle(ps[1])]:body;
+ return groupResult('relationship-group-'+k,lead,relationalBody+'\n\n'+RELATION_DYNAMIC[groupTheme(ps[2])]+'\n\n'+RELATION_RESPONSE[relationResponse(ps)],ps);
+}
+const ROMANCE_TENSION={
+ warmthGuard:['这段关系里有温柔的牵动，可一到真正靠近的时候，顾虑又让人把脚步收了回去。','{a}与顾虑位的{b}相遇，亲近和自我保护留在了同一段来往里。感受有流动，表达却没有同样轻松，所以会出现一些让人在意的小细节，却迟迟等不到同样明白的态度。'],
+ warmthWeary:['你们的来往里有柔软的感受，可能投入的余力还没有跟上，靠近也就显得一阵温暖、一阵安静。','把{a}和{b}连着看，感受与精力没有走在同一个节奏上。有人情味的回应仍会出现，顾虑里的负担也不会因此消失，这份亲近还带着没能放松下来的部分。'],
+ warmthFog:['你们之间有让人心动的亲近，也有还说不清的顾虑，甜和拿不准暂时混在了一起。','{a}和{b}放在一起，让来往里的温柔多了一层悬着的感觉。感受还没来得及变成清楚的表达，想象已经替它走远了，亲近和是否认定彼此也因此还不能画上等号。'],
+ fastGuard:['你们的来往有向前靠近的意味，可顾虑没有跟着消失，主动和真正放心地投入之间还隔着一些距离。','{a}与{b}的联系在于速度和准备并不同步。相处可以突然变得热络，心里在意的部分却还留在原地，于是靠近之后也容易重新试探彼此的分寸。'],
+ quiet:['眼前的感受仍带着保留，顾虑也占着位置，这段关系暂时还没有走到能让彼此放心确认的程度。','{a}与{b}连着看，眼下更多是各自心里的活动，真正交到对方手里的表达还不多。安静背后可以有许多缘由，这组牌还没有让保留本身成为藏着喜欢的证明。'],
+ fog:['这段关系里有不少让人反复揣摩的部分，感受和顾虑纠缠着，眼前还很难看见一个明白的态度。','{a}和{b}放在一起，让不完整的线索和各自的担心互相放大。一次来往已经能留下很多想法，真正可以确认的东西却没有同样多，关系便容易停在想得比说得远的位置。'],
+ strain:['这段来往已经带着一些不轻松的感受，顾虑又让表达变得更难，亲近暂时还没有让人完全放松。','{a}与{b}连起来，感受里留下的消耗会影响之后愿意交出多少。一次没有对上的回应，也可能碰到先前就有的委屈，关系里的迟缓便不只来自眼前这一刻。'],
+ grounded:['这段来往里有认真对待实际相处的意味，感受还需要经过顾虑与日常，才能慢慢显出分量。','{a}与{b}放在一起，关系更看重能否实际地相处，也仍带着尚未放下的顾虑。安稳会在真实来往里形成，眼前这份认真究竟有多少属于爱情，还不能只凭可靠的表现来确定。'],
+ clear:['这段关系里有想把事情看清的意味，感受和顾虑都需要面对真实的来往，还没有自动变成浪漫的表态。','{a}和{b}连着看，对关系的理解正在碰到各自的顾虑。判断和分寸显得比较重要，有些话即使说得清楚，也仍需要和是否有心动分开理解。'],
+ changing:['你们之间原来的感觉正在面对变化，牵挂与顾虑还留着，相处也还没有找到新的安定。','{a}与{b}放在一起，变化没有把原来的感受一下带走，顾虑却会影响接下来愿意留下多少。关系还在重新适应，留恋、结束旧的方式和是否重新靠近，需要放在后面的来往里继续理解。'],
+ repairing:['这段来往有慢慢缓和的余地，感受仍带着小心，顾虑也还没因为一点回应就完全过去。','{a}和{b}连起来，恢复与谨慎同时留在关系里。重新有一点温度，不等于旧的顾虑已经消失，彼此能不能在之后的来往里感到不同，仍影响着这份亲近。'],
+ moving:['这段来往有想往前走的意味，顾虑却也仍在，靠近的动作和关系能有多深还没有完全合上。','{a}与{b}相遇，愿意参与和面对关系时的顾虑留在同一处。联系可以带来兴奋，也会把原来没处理的部分带到面前，热络和能否持续还需要经过之后的相处。'],
+ different:['眼前的感受和愿意靠近的程度还没有完全重合，这段关系也因此留着一些让人拿不准的余地。','{a}与{b}放在一起，心里的牵动和面对关系时的顾虑需要同时被理解。感受并不会自动消除担心，担心也不能单独证明心动，这两边怎样影响来往，才是这组牌正在展开的部分。']
+};
+const ROMANCE_NEXT={
+ warm:'把{c}与前面的{a}、{b}连起来，后面的相处多了回应和亲近的空间。原先的顾虑仍在，好意却有机会在来往中被更清楚地收到，这说的是逐渐靠近的方向，还没有把感受写成承诺。',
+ ground:'{c}接在{a}与{b}之后，让后续更重视能否持续地相处。前面的感受和顾虑会慢慢落到联系、陪伴和实际安排里，关系的分量也更取决于这样的来往能否延续。',
+ move:'{c}与{a}、{b}连着看，后面有比眼下更主动、更容易出现来往的意味。联系会让前面的顾虑碰到真实的相处，但一次靠近能走多远，还没有在这里落定。',
+ guard:'把{c}接到{a}与{b}后面，保留仍然影响着后续的来往。前面的感受还没有让人彻底放下保护自己的方式，关系可能有牵挂，却仍需要留出距离。',
+ fog:'{c}与前面的{a}、{b}放在一起，后续仍有没被说清的部分。眼前的牵动和顾虑还会参与之后的猜测，关系暂时没有因为多一点感受就自然走向确定。',
+ drain:'当{c}接在{a}与{b}之后，后续来往仍带着承受力不足的意味。前面的感受需要经过现实中的精力与回应，心里有多少牵动，并不能单独决定能走近多少。',
+ pause:'{c}接在{a}与{b}之后，让后续的停顿比表态更显眼。前面的感受和顾虑都还留着，但它们暂时没有一起变成往前的行动，这段安静还不能被读成某个已经确定的结局。',
+ shift:'把{c}与{a}、{b}放在一起，原来的来往方式很难一直不变。感受和顾虑正在面对一段转变，彼此可能需要重新理解这段联系，变化会带来怎样的距离仍留着余地。',
+ repair:'{c}与{a}、{b}连起来，后面的相处有慢慢缓和的空间。原先的顾虑不必一下就消失，关系仍有机会在新的回应里减轻一点紧张，只是修复还不等于已经作出了同样的选择。',
+ clear:'{c}接在{a}与{b}之后，让前面含糊的感受和顾虑更难一直藏在猜测里。后续更重视表达与事实，什么是真正愿意给予的、什么仍没有准备好，逐渐有了被看见的机会。',
+ friction:'把{c}与{a}、{b}放在一起，后续仍需要经过彼此没有对上的部分。前面的感受不会自动抹平分歧，相处中的期待与真实回应能否合上，仍影响着这段联系。'
+};
+const ROMANCE_PARTICIPATION={
+ warmPause:'把你这边的{d}和回应位的{e}放回这段来往，你带着感受靠近，却也需要在等待里安顿自己。前面的牵动与顾虑，便和你愿意等到哪里、这段节奏能否让你舒服连在了一起。',
+ fogClear:'你这边的{d}与回应位的{e}相遇，让猜测和真实表达之间的距离更显眼。前面的关系会让人想很多，你的期待与真正得到的回应却还需要分开看，这也影响着你怎样参与之后的相处。',
+ wearyCare:'{d}与回应位的{e}一起出现，让你的疲惫和关系里能得到的照顾连在一起。前面的来往有没有温度，也要看它是否容得下你的心情，而不只是你还能为它投入多少。',
+ move:'把你这边的{d}与回应位的{e}放回前面的关系，自己的感受碰到了重新参与、发起联系的可能。你的回应会影响来往的样子，双方能否走到同样近的位置，仍有后面的相处要经过。',
+ warm:'{d}与回应位的{e}连起来，你怎样表达感受，也参与了前面那段亲近与迟疑。关系里能有多少温度，需要经过彼此真正收到的回应，心里的期待还不能代替这样的来往。',
+ ground:'{d}与回应位的{e}放回前面的关系，你的投入和日常能否持续相处连在了一起。牵动会落到实际的联系与陪伴里，这段来往能否让你安心，也会渐渐变得具体。',
+ guard:'你这边的{d}与回应位的{e}一起出现，让自己的感受和保护自己的空间同样重要。前面的牵动与迟疑还在，关系能有多近，也和你是否可以自在地待在其中连在一起。',
+ fog:'把{d}与回应位的{e}放回前面的来往，自己的感受也还留着没能看清的部分。关系里的线索与心里的期待会互相影响，你怎样理解它，也会改变之后愿意投入多少。',
+ drain:'{d}与回应位的{e}连着看，你的心情已经碰到了能承受多少的边缘。前面的关系节奏会影响这份消耗，继续来往的分量也需要和自己的余力放在一起理解。',
+ pause:'把{d}与回应位的{e}一起读，你怎样面对前面的牵动，还需要一段停下来理解自己的空间。这段关系未必马上有一个表态，你也仍在分辨这份来往究竟让自己感到什么。',
+ shift:'{d}与回应位的{e}放回前面的关系，你与这段来往的距离也正在重新调整。牵挂可能还在，原来的参与方式却未必能够一直延续，双方都需要经过实际相处才能知道新的分寸。',
+ repair:'把{d}与回应位的{e}连起来，你的感受和慢慢恢复安心的过程有了联系。前面关系里的迟疑需要经过不同的回应，亲近才可能逐渐不再碰到同样的旧伤。',
+ clear:'{d}与回应位的{e}一起出现，让你的感受需要和真实的表达放在一起理解。前面的猜测与保留还在，什么是自己盼着的、什么是双方已经说过或做过的，也开始影响你的判断。',
+ friction:'把{d}与回应位的{e}放回前面的来往，你尚未被理解的部分和双方的分歧碰在了一起。关系里的吸引不会让这些不同自然消失，怎样回应不舒服，也会影响之后还愿意靠近多少。'
+};
+function romanceParticipation(self,response){
+ if(inThemes(self,'warm')&&inThemes(response,'pause','guard'))return 'warmPause';
+ if(inThemes(self,'fog')&&inThemes(response,'clear'))return 'fogClear';
+ if(inThemes(self,'drain')&&inThemes(response,'warm','ground'))return 'wearyCare';
+ return groupTheme(response);
+}
+function romanceGroup(record,ps){
+ const five=record.spreadId==='relationship',a=ps[five?1:0],b=ps[five?2:1],c=ps[five?3:2],t=obstacle(b);let key='different';
+ if(inThemes(a,'warm')&&['grip','care','clarity'].includes(t))key='warmthGuard';
+ else if(inThemes(a,'warm')&&['hurt','load'].includes(t))key='warmthWeary';
+ else if(inThemes(a,'warm')&&['fog','wait','stall'].includes(t))key='warmthFog';
+ else if(inThemes(a,'move')&&['grip','stall','wait'].includes(t))key='fastGuard';
+ else if(inThemes(a,'guard','pause'))key='quiet';
+ else if(inThemes(a,'fog'))key='fog';
+ else if(inThemes(a,'drain','friction'))key='strain';
+ else if(inThemes(a,'ground'))key='grounded';
+ else if(inThemes(a,'clear'))key='clear';
+ else if(inThemes(a,'shift'))key='changing';
+ else if(inThemes(a,'repair'))key='repairing';
+ else if(inThemes(a,'move'))key='moving';
+ const [lead,body]=ROMANCE_TENSION[key],ordered=five?[a,b,c,ps[0],ps[4]]:[a,b,c];
+ const joined=key==='warmthGuard'&&groupTheme(c)==='pause'?'{a}的亲近和{b}的自我限制放在一起，像是感受已经往前走了一点，顾虑却又让表达收了回去；后面的{c}也没有把这份牵动带向更频繁的来往。感受、顾虑与后续连起来，关系里可以有温柔，却仍隔着一段需要独自消化的距离，眼下的安静并不能直接抹掉感受，也不能被读成承诺。':body+'\n\n'+ROMANCE_NEXT[groupTheme(c)];
+ const result=groupResult('romance-group-'+key,lead,joined+(five?'\n\n'+ROMANCE_PARTICIPATION[romanceParticipation(ps[0],ps[4])] :''),ordered);
+ return result;
+}
+function choose(record,positions,crush=false){
+ const question=questionReading(record,positions,crush),base=question||chooseStory(record,positions,crush);
+ if(!['guidance','relationship'].includes(record.spreadId))return base;
+ const group=crush?romanceGroup(record,positions):record.spreadId==='guidance'?guidanceGroup(record,positions):relationshipGroup(record,positions);
+ // Keep the direct answer and its valid evidence position. A whole-spread
+ // body must not let an advice card change a yes/no answer or promise a result.
+ if(question)return {...question,body:group.body,synthesis:group.synthesis};
+ return {...group,key:base.key.match(/^(?:card-|romance-card-|relationship-card-)/)?group.key:base.key,text:base.key.match(/^(?:card-|romance-card-|relationship-card-)/)?group.text:base.text};
+}
 return {choose,signals,questionIntent};
 });
 
@@ -5447,7 +5752,7 @@ function buildCrushReading(record,spread,positions){
  positions[feelIdx].voice.quoteTitle='牌面联想 · '+swap('TA 想说的话');
  positions[feelIdx].voice.quote=swap(`“${D[feelIdx].crush.words}”`);
  const adviceIdx=spread.id==='relationship'?4:feelIdx;
- return {spread,positions,overview,verdict:swap(story.text),storyKey:story.key,questionAnswer:story.question||null,voice:true,crush:true,actionTitle:'如果想回应这组牌',note:swap('这是牌面联想，不是 TA 的真实表态。最后怎么看，还是要以实际相处为准。'),pairs:[],actions:[positions[adviceIdx].practice],psychology:G.psychology({...record,focus:'relationship'},positions,{storyKey:story.key,question:story.question,crush:true}),counts:{},reversed:positions.filter(p=>p.pick.reversed).length,courts:0};
+ return {spread,positions,overview,verdict:swap(story.text),storyKey:story.key,questionAnswer:story.question||null,synthesis:story.synthesis||null,voice:true,crush:true,actionTitle:'如果想回应这组牌',note:swap('这是牌面联想，不是 TA 的真实表态。最后怎么看，还是要以实际相处为准。'),pairs:[],actions:[positions[adviceIdx].practice],psychology:G.psychology({...record,focus:'relationship'},positions,{storyKey:story.key,question:story.question,crush:true}),counts:{},reversed:positions.filter(p=>p.pick.reversed).length,courts:0};
 }
 function buildVoiceReading(record,spread,positions){
  if(isCrushReading(record))return buildCrushReading(record,spread,positions);
@@ -5460,7 +5765,7 @@ function buildVoiceReading(record,spread,positions){
  });
  const story=S.choose(record,positions),overview=narrativeOverview(positions,story);
  const advice=positions.find(p=>p.slot.role==='advice')||positions[0];
- return {spread,positions,overview,verdict:story.text,storyKey:story.key,questionAnswer:story.question||null,voice:true,pairs:[],actionTitle:'如果想回应这组牌',actions:[advice.practice],psychology:G.psychology(record,positions,{storyKey:story.key,question:story.question}),counts:{},reversed:positions.filter(p=>p.pick.reversed).length,courts:0};
+ return {spread,positions,overview,verdict:story.text,storyKey:story.key,questionAnswer:story.question||null,synthesis:story.synthesis||null,voice:true,pairs:[],actionTitle:'如果想回应这组牌',actions:[advice.practice],psychology:G.psychology(record,positions,{storyKey:story.key,question:story.question}),counts:{},reversed:positions.filter(p=>p.pick.reversed).length,courts:0};
 }
 function buildReading(record,cards,depth){
  const spread=SPREADS[record.spreadId];if(!spread||record.picks.length!==spread.count)throw new Error('Spread/card count mismatch');
