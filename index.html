@@ -5334,7 +5334,7 @@ function groupResult(key,text,body,ps){return {...fixed(key,fillGroup(text,ps),f
 // A supportive upright meaning must be read as overuse here, not as a future.
 function obstacle(p){
  const t=groupTheme(p);
- if(code(p)==='57U')return 'grip';
+ if(code(p)==='57U'||code(p)==='67R')return 'grip';
  if(code(p)==='52U'||code(p)==='59U')return 'hurt';
  if(p.pick.reversed)return {move:'stall',warm:'care',ground:'grip',guard:'grip',fog:'fog',drain:'load',pause:'stall',shift:'change',repair:'hurt',clear:'clarity',friction:'friction'}[t];
  return {move:'haste',warm:'care',ground:'grip',guard:'grip',fog:'fog',drain:'load',pause:'wait',shift:'change',repair:'wait',clear:'clarity',friction:'friction'}[t];
@@ -5460,6 +5460,7 @@ function guidanceGroup(record,ps){
  return groupResult('guidance-group-'+key,lead,relationalBody+'\n\n'+GUIDANCE_RESPONSE[groupTheme(c)],ps);
 }
 const RELATION_PAIRS={
+ unbalanced:['你们之间的付出和回应还没有落在同一个分量上，有些想维持好的来往，也因此带上了压力和委屈。','{a}与{b}连起来，双方怎样理解付出变得格外重要。一边认为已经给出的关心，另一边未必以同样的方式收到，接受帮助也可能带着压力，关系因此很难只凭谁做得更多来衡量。'],
  closeQuiet:['你想在相处里感到亲近，对方却把更多东西留在心里，关系里的距离也就不只是联系多或少那么简单。','{a}与{b}放在一起，能看见双方表达的分量并不相同：一边更容易把感受带进来往，一边更需要保留空间。越想从回应里确认亲近，安静就越容易被读成冷淡，彼此的节奏也因此更难合上。'],
  fastSlow:['你们对靠近的节奏还没有同样的准备，一方已经在等着进展，另一方却仍需要停留在自己的空间里。','{a}和{b}的速度差，让相处变成了一边靠近、一边等候。来往因此很容易带上催促和退让的意味，即使没有谁刻意为难谁，双方也未必能从同一次互动里得到同样的安心。'],
  uncertainQuiet:['你越想弄清楚这段关系，对方的保留就越显眼，没有说开的部分也渐渐占了相处的大半。','{a}与{b}连起来，线索不足和保留距离互相加重。沉默里究竟是什么还没被看见，心里却已经替它准备了许多解释，关系便容易停在猜测多过交谈的地方。'],
@@ -5470,6 +5471,7 @@ const RELATION_PAIRS={
  unequalPace:['你们正用不同的方式对待这段来往，有人更在意感受，有人更在意自己的节奏，关系还没形成同样的默契。','{a}和{b}放在一起，彼此的出发点并不完全相同。同一件小事落到两边，可能一边觉得已经表达了心意，一边却还在等另一种回应，这种差别也参与了你们现在的相处。']
 };
 function relationPair(ps){const [a,b]=ps;
+ if(has(a,'uneven')||has(b,'uneven'))return 'unbalanced';
  if(inThemes(a,'warm')&&inThemes(b,'pause','guard'))return 'closeQuiet';
  if(inThemes(a,'move')&&inThemes(b,'pause','guard'))return 'fastSlow';
  if(inThemes(a,'fog')&&inThemes(b,'guard','pause'))return 'uncertainQuiet';
@@ -5512,6 +5514,7 @@ const RELATION_DYNAMIC={
  friction:'{c}处在你们之间，让{a}与{b}的不同更容易变成碰撞。一次互动留下的不舒服，会影响下一次双方愿意说多少，关系也因此容易越在意越紧张。'
 };
 const RELATION_RESPONSE={
+ hopeToAction:'期待位的{d}与回应位的{e}相遇，你盼着关系里有能够真正落下来的进展，眼下的条件却还没把这份期待安顿好。前面的相处与这份愿望放在一起，能看见心里已经很在意，实际怎样参与却仍需要重新展开。',
  closenessSpace:'期待位的{d}与回应位的{e}之间也有一点距离：你想在这段关系里得到安稳的亲近，回应的位置却留出了独处与边界。前面那种相处还没有同时容下靠近和自在，所以喜欢来往，也可能会觉得累。',
  closenessTruth:'把期待位的{d}与回应位的{e}放在一起，你想要的亲近需要经得起真实的表达。它和互动位的{c}呼应着：安稳不能只靠彼此猜中，有些期待和分歧也需要在关系里有位置。',
  clarityCare:'期待位的{d}与你的回应位{e}一起出现，让明确的答案和日常的照顾连在了一起。前面的互动究竟能给你多少安心，也要看说出口的态度能否在真实来往里被感受到。',
@@ -5530,6 +5533,7 @@ const RELATION_RESPONSE={
  friction:'{d}与回应位的{e}一起出现，让你的期待碰到了还没谈拢的分歧。前面的相处里，不舒服会影响下一次的回应，关系也需要容得下彼此不同的立场。'
 };
 function relationResponse(ps){const need=ps[3],response=ps[4];
+ if(code(need)==='64R'&&inThemes(response,'move'))return 'hopeToAction';
  if(inThemes(need,'warm','ground')&&inThemes(response,'guard','pause'))return 'closenessSpace';
  if(inThemes(need,'warm','ground')&&inThemes(response,'clear','friction'))return 'closenessTruth';
  if(inThemes(need,'clear')&&inThemes(response,'warm','ground'))return 'clarityCare';
@@ -5540,7 +5544,8 @@ function relationResponse(ps){const need=ps[3],response=ps[4];
 function relationshipGroup(record,ps){
  const k=relationPair(ps),[lead,body]=RELATION_PAIRS[k];
  const relationalBody=k==='unequalPace'?RELATION_CONTEXT[relationStyle(ps[0])+'-'+relationStyle(ps[1])]:body;
- return groupResult('relationship-group-'+k,lead,relationalBody+'\n\n'+RELATION_DYNAMIC[groupTheme(ps[2])]+'\n\n'+RELATION_RESPONSE[relationResponse(ps)],ps);
+ const dynamic=code(ps[2])==='71R'?'{c}处在你们之间，让{a}与{b}的差异带上了反复投入、却没有得到同样进展的感觉。来往未必少，原来的相处方式却开始失去成效，做过的事情也就不一定让彼此更靠近。':RELATION_DYNAMIC[groupTheme(ps[2])];
+ return groupResult('relationship-group-'+k,lead,relationalBody+'\n\n'+dynamic+'\n\n'+RELATION_RESPONSE[relationResponse(ps)],ps);
 }
 const ROMANCE_TENSION={
  warmthGuard:['这段关系里有温柔的牵动，可一到真正靠近的时候，顾虑又让人把脚步收了回去。','{a}与顾虑位的{b}相遇，亲近和自我保护留在了同一段来往里。感受有流动，表达却没有同样轻松，所以会出现一些让人在意的小细节，却迟迟等不到同样明白的态度。'],
