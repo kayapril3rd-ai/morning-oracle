@@ -111,7 +111,7 @@ body{isolation:isolate}.nebula{opacity:.5}.stage-status .stage-counts:has(#remai
 <footer class="compact-footer"><span id="dateText"></span><button id="aboutBtn">牌意与来源 ↗</button></footer>
 <dialog id="setupChangeDialog" class="dialog setup-change-dialog" aria-labelledby="setupChangeTitle" aria-describedby="setupChangeText"><h2 id="setupChangeTitle">切换并重新选牌？</h2><p id="setupChangeText"></p><div class="setup-change-actions"><button id="keepSetupBtn" class="secondary-button" autofocus>继续当前抽牌</button><button id="confirmSetupBtn" class="primary-button slim">切换并重新选牌</button></div></dialog>
 <dialog id="readingDialog" class="dialog reading-dialog"><div class="dialog-header"><div><h2 id="dialogReadingTitle">牌阵解读</h2></div><button class="close-dialog" aria-label="关闭解读">×</button><div class="reading-tabs expanded-tabs" role="tablist" aria-label="完整解读"><button role="tab" id="overviewTab" aria-controls="overviewPane" aria-selected="true">整体</button><button role="tab" id="detailsTab" aria-controls="detailsPane" aria-selected="false" tabindex="-1">逐张</button><button role="tab" id="journalTab" aria-controls="journalPane" aria-selected="false" tabindex="-1">手记</button></div></div><details class="reading-context"><summary>本次问题与牌阵说明</summary><div class="question-quote" id="questionQuote" hidden></div><p id="readingScope" class="reading-scope"></p><p id="layoutNote" class="layout-note" hidden>第二张横放表示交叉影响，正逆位仍按抽取方向解释。</p></details>
- <div role="tabpanel" id="overviewPane" aria-labelledby="overviewTab"><div id="overviewSections" class="overview-sections"></div><details id="pairDetails" class="psychology-details"><summary>这几张牌怎么一起看</summary><div id="pairSections" class="pair-sections"></div></details><details id="psychologyDetails" class="psychology-details"><summary>用心理学方法，把牌意落到生活里</summary><p class="psychology-note">这两个方法是根据你选的主题挑的，和抽到哪张牌无关。没有研究证明某张牌代表某种心理状态；它们只是帮你整理想法的工具，不用于测评或诊断。</p><div id="psychologySections"></div></details><section class="action-section" id="actionSection"><span class="eyebrow">TAKE IT INTO REAL LIFE</span><h3 id="actionTitle">今天就能做的一件事</h3><ol id="actionList"></ol></section><p class="psychology-note reading-note" id="readingNote">塔罗是一面帮你看清自己的镜子，最后怎么走还是你说了算。</p></div>
+ <div role="tabpanel" id="overviewPane" aria-labelledby="overviewTab"><div id="overviewSections" class="overview-sections"></div><details id="pairDetails" class="psychology-details"><summary>这几张牌怎么一起看</summary><div id="pairSections" class="pair-sections"></div></details><details id="psychologyDetails" class="psychology-details"><summary>用心理学方法，把牌意落到生活里</summary><p class="psychology-note">这里从本次解读谈到的生活体验出发，提供相关的心理学解释。牌义与理论的联系是阅读参考，不能用来测评、诊断，或判断别人的真实想法。</p><div id="psychologySections"></div></details><section class="action-section" id="actionSection"><span class="eyebrow">TAKE IT INTO REAL LIFE</span><h3 id="actionTitle">今天就能做的一件事</h3><ol id="actionList"></ol></section><p class="psychology-note reading-note" id="readingNote">塔罗是一面帮你看清自己的镜子，最后怎么走还是你说了算。</p></div>
  <div role="tabpanel" id="detailsPane" aria-labelledby="detailsTab" hidden><div id="positionDetails" class="position-details"></div></div>
  <div role="tabpanel" id="journalPane" aria-labelledby="journalTab" hidden><div class="journal-panel expanded-journal"><div class="journal-title"><span>✧</span><div><h3>这组牌，与你有什么联系？</h3><p>记下让你停留的牌、具体画面、感受，以及现实里可以核对的线索。</p></div></div><label for="feeling">我的第一感受与理解</label><textarea id="feeling" rows="5" maxlength="3000" placeholder="例如：我注意到阻碍位里的……它让我想到……但我还需要核对……"></textarea><div class="journal-buttons"><button id="saveNoteBtn" class="secondary-button">保存我的感受</button><span id="noteStatus" aria-live="polite"></span></div><div class="personal-reading"><h3>把牌意与我的原话放在一起</h3><p>把完整牌阵、解读和你写下的感受合成一份文字，方便复制带走。</p><button id="organizeBtn" class="primary-button slim">合成一份可复制的手记 ✦</button><div id="reflectionText" class="ai-reading" hidden></div><button id="copyReflectionBtn" class="text-button" hidden>复制我的手记 ↗</button></div></div></div>
  <div class="reading-bottom"><span id="storageNote">本次牌阵已收进手记</span><div><button id="copyReadingBtn" class="text-button">复制完整解读</button><button id="saveImageBtn" class="text-button">保存牌阵图片 ↓</button></div></div></dialog>
@@ -341,19 +341,95 @@ const SOURCES={
  reappraisal:{title:'把发生的事与自己的解释分开',name:'认知重评 · Gross（1998）',citation:'Gross, J. J. (1998). Antecedent- and response-focused emotion regulation: Divergent consequences for experience, expression, and physiology. Journal of Personality and Social Psychology, 74(1), 224–237.',url:'https://pubmed.ncbi.nlm.nih.gov/9457784/',evidence:'认知重评是重新理解一件事的含义。Gross 的影片实验区分了“换一种理解”和“压住表情”：两者对主观感受和生理反应的影响并不相同。',limit:'这是特定实验情境的结果，不代表换个想法就能解决所有困难。重新理解也不等于否认事实，或把责任都放在自己身上。'},
  planning:{title:'把愿望写成一个有触发点的行动',name:'实施意图 · Gollwitzer 与 Sheeran',citation:'Gollwitzer, P. M., & Sheeran, P. Implementation Intentions. Author-written research overview, National Cancer Institute. Foundational paper: Gollwitzer (1999), American Psychologist, 54(7), 493–503.',url:'https://cancercontrol.cancer.gov/brp/research/constructs/implementation-intentions',evidence:'实施意图把“我想做”写成“如果遇到某个情况，我就采取某个行动”。相关研究讨论这种计划怎样帮助人把已有的目标落实到行为。',limit:'行动要确实可行，也要是你认可的目标。计划不能替代资源、支持或环境改变；作者综述页面为历史资料，不代表最新研究全貌。'}
 };
-// Theories are chosen by what the user is asking about (focus / spread), not by which cards came up,
-// so the text never claims a card "revealed" a psychological state.
-function psychology(record,positions){
- const relation=record.focus==='relationship'||record.spreadId==='relationship';
- const choosing=record.focus==='choice'||record.spreadId==='choice';
- const first=relation||choosing?'needs':'reappraisal';
- const second='planning';
- return [first,second].map(key=>{
-  const ref=SOURCES[key];
-  const connection=key==='needs'?(choosing?'做选择时，最难的常常是说不清自己到底想要什么。可以用下面三种需要，分别给两条路问一遍。':'如果这次想梳理一段关系，可以用下面三种需要检查自己的体验，帮自己把“想要什么”说具体。'):key==='reappraisal'?'如果一句牌意让你联想到某件事，可以先把“实际发生了什么”和“我怎么解释它”分开，再检查自己的理解有没有事实支持。':'读完牌想改变一点什么，最容易卡在“想了但没做”。把下方“今天可以先做的一步”写成“如果……就……”，更容易真的做到。';
-  const question=key==='needs'?'选最近一次具体经历问自己：我能表达意愿吗？有没有完成事情所需的能力和支持？有没有被认真倾听？哪一点与这次困惑最相关？':key==='reappraisal'?'写下“实际发生了什么”和“我当时怎么解释”两栏，再补一个同样符合事实的解释。例如“对方还没回复”不自动等于“对方不在乎我”。':'把自己愿意尝试的一步写成：“如果____发生，我就____。”例如“如果明天打开工作电脑，我就先用五分钟写出最重要任务的第一步。”';
-  return {key,...ref,connection,question};
- });
+// These links explain everyday experiences named in the reading. They are
+// editorial associations, never a validated card-to-trait map or a diagnosis.
+Object.assign(SOURCES,{
+ support:{title:'可以获得的支持',name:'社会支持与压力缓冲 · Cohen & Wills（1985）',citation:'Cohen, S., & Wills, T. A. (1985). Stress, social support, and the buffering hypothesis. Psychological Bulletin, 98(2), 310–357.',url:'https://pubmed.ncbi.nlm.nih.gov/3901065/',evidence:'这篇综述区分了与人保持联系，以及在需要时能获得具体帮助。倾听、信息和实际协助各有用途；支持是否贴合当时的需要很重要。',limit:'综述讨论群体研究与理论模型，不能据此判断某个人一定会帮助你，也不能用社交人数衡量一个人是否幸福。'},
+ compassion:{title:'困难时怎样看待自己',name:'自我关怀 · Neff（2003）',citation:'Neff, K. D. (2003). Self-compassion: An alternative conceptualization of a healthy attitude toward oneself. Self and Identity, 2(2), 85–101.',url:'https://self-compassion.org/wp-content/uploads/publications/SCtheoryarticle.pdf',evidence:'Neff 把自我关怀概括为善待自己、理解困难也是人类共同经验，以及不过度卷入痛苦。这篇文章提出概念框架，并不等同于某种练习已被证明对每个人有效。',limit:'善待自己不等于否认责任，也不能替代休息、现实支持或需要时的专业帮助。'},
+ uncertainty:{title:'还不知道答案的感觉',name:'对不确定性的研究 · Carleton（2016）',citation:'Carleton, R. N. (2016). Fear of the unknown: One fear to rule them all? Journal of Anxiety Disorders, 41, 5–21.',url:'https://pubmed.ncbi.nlm.nih.gov/27067453/',evidence:'这篇理论综述讨论了未知与焦虑之间的关系，以及人为什么会难以忍受没有答案的处境。它提出一种解释角度，不代表每一次等待都会造成焦虑。',limit:'普通的好奇、犹豫和等待不是诊断。牌面不能测出你的不确定性耐受程度，也不能揭示别人的想法。'}
+});
+// Complete paragraphs are authored for a reading topic. Only the choice of
+// paragraph changes; no random rotation, keyword decoration, or card text copy.
+const PSYCH_TOPICS={
+ belonging:{
+  needs:['安顿下来，为什么会让人松一口气','这次解读谈的是相聚、安顿和有所归属。用自我决定理论来看，和人有联系、自己的存在被认真对待，是联结需要的一部分；一顿饭或一个熟悉的空间，也可能承载这种体验。','最近哪一次相处，让你觉得可以自然地待着，不用一直证明自己？'],
+  support:['身边有人，和有人能帮上忙','这里的安稳也让人想到支持感：知道有人愿意听你说话，或在需要时搭把手，和只是认识很多人，是两种不同的体验。这个角度解释的是现实里的相处，不是牌面保证你一定会得到帮助。','让你安心的那个人或那个地方，具体提供了什么：倾听、陪伴，还是实际帮助？']
+ },
+ fatigue:{
+  compassion:['累的时候，容易把自己看得更差','这次解读里，消耗和继续撑着同时存在。自我关怀提供的角度是：承认现在确实吃力，不把一次做不动，扩大成对整个人的否定。','如果同样的疲惫发生在朋友身上，你会怎样理解他现在的表现？'],
+  support:['吃力也和可用的支持有关','当一件事显得很费力，个人意愿只是其中一部分。有人分担任务、提供信息，或认真听完一段话，可能改变实际负担；支持的内容需要贴合眼下的困难。','眼下最缺的是休息、有人听你说，还是一项能被分担的具体任务？']
+ },
+ worry:{
+  compassion:['已经很担心了，别再多责怪自己一层','这次解读谈到的是一件事在心里反复盘旋。自我关怀强调，不过度卷入难受，也不因为自己还在担心，就再责备自己想得太多。它关注的是怎样对待这份感受。','除了事情本身，你有没有也在责怪自己不该这么在意？'],
+  reappraisal:['担心的画面，和已经发生的事','担心常常会把还没发生的后果带到眼前。认知重评提供的角度是看清，哪些是已经能确认的事实，哪些是脑海里预演的可能；这不会让现实困难消失，但能帮助理解担心从哪里来。','现在脑海里最难受的那个结果，已经发生了，还是你担心它会发生？']
+ },
+ uncertainty:{
+  uncertainty:['没有答案，为什么还会一直惦记','这次解读留下了尚未说清、还在等待的部分。对不确定性的研究能帮助理解：缺少答案本身就可能令人不安，于是一个很小的信号，也容易被反复琢磨。','现在最让你在意的，是已经发生的事，还是还不知道会不会发生的事？'],
+  reappraisal:['一个信号，可以有几种解释','这里适合把观察和推测分开看。一次沉默、一条回复或暂时停顿，可能让人联想到很多含义；认知重评关心的是，同一件已知的事，是否还有符合事实的理解。','你目前确实知道什么？那个最让你难受的解释，还有没有别的可能？']
+ },
+ action:{
+  planning:['有想法，和真正开始之间','这次解读谈到起步、练习或推进。实施意图关注的正是意愿和行为之间的距离：一个目标即使很重要，也可能因为没有合适的开始时机而停在想法里。','如果你愿意往前试一点，什么具体情境最适合开始？那时能做哪一个小动作？'],
+  needs:['做得动，也需要能力和条件','这里的行动感还可以从胜任需要理解。人能不能投入，和是否有方法、反馈与支持有关；有时进展慢，并不能简单归因为不够想要。','这件事里，你已经会做的部分是什么？还缺哪一种资源或反馈？']
+ },
+ cooperation:{
+  support:['合作里的帮助，要能对上需要','这次解读涉及配合与共同完成。社会支持研究提醒我们，鼓励、建议和实际分担并不是同一种帮助；给出的支持和对方需要的支持，也可能没有对上。','这次配合里，最需要谈清的是分工、信息，还是彼此希望得到怎样的帮助？'],
+  needs:['一起做事，也要有自己的声音','共同做事时，联结、胜任和自主可能同时重要。有人一起承担，会让事情有依靠；能表达自己的想法、有完成事情的条件，也影响这段合作的体验。','在这次合作里，你能表达意愿吗？责任和决定的空间是否相配？']
+ },
+ conflict:{
+  needs:['分歧背后，可能在乎不同的事','这次解读提到了相处中的碰撞。用基本心理需要的角度看，有时一方重视自己作主，另一方更在意被回应；两种需要没有被说清，就容易只剩下表面的争执。','同一件事里，你最在意的是什么？对方实际表达过的需要又是什么？'],
+  reappraisal:['同一次互动，双方未必读成同一个意思','争执里，一个行为容易被理解为态度或立场。认知重评提供的角度是重新审视这层解释，同时保留确实发生的事实和应该承担的责任。','能不能把那次互动里的原话，和你对那句话的理解分别说出来？']
+ },
+ boundaries:{
+  needs:['关心一个人，也有自己的意愿','这次解读里的付出、距离或保留，可以让人想到自主需要。自愿的照顾和勉强答应，外表可能相似，身处其中的感受却不一定相同。','最近一次答应别人时，你是真的愿意，还是很难说出自己的想法？'],
+  compassion:['自己的感受，也需要被算进去','当很多精力放在照顾别人或守住一段关系上，自我关怀提醒的是把自己的疲惫和为难也看见。它不替你决定亲近还是离开，只提供一种看待自己的方式。','这段经历里，你的哪一种感受一直没有得到空间？']
+ },
+ transition:{
+  reappraisal:['事情变了，原来的理解也会动摇','这次解读涉及结束、变化或重新适应。认知重评关心我们怎样理解已经发生的变化；同一段结束，可能同时包含失去、遗憾和新的空间，不必急着只留下一个结论。','这次变化里，有什么确实失去了？又有什么意义还没有想清楚？'],
+  compassion:['还在适应，不必立刻恢复如常','变化后的感受往往没有一个整齐的收尾。自我关怀的角度，是让难过、迟疑或暂时不适应有被理解的空间，而不是要求自己马上表现得很好。','现在的你，有哪一部分还需要时间？']
+ },
+ autonomy:{
+  needs:['选择里，什么是你自己认同的','这次解读涉及独处、思考或两种方向。自主需要讲的是对自己的行动有认同感，并不等于凡事都得独立完成；别人的建议，也可能和你自己的意愿一致。','把别人的期待暂时放到旁边，你最在意这个选择带来的哪一种生活？'],
+  uncertainty:['暂时拿不准，也可能是条件还没清楚','面对不同方向，人常常希望等所有后果都确定才决定。对不确定性的研究提供一个角度：需要更多信息，和希望彻底消除未知，是两件不同的事。','哪条信息真的能帮助你区分选项？哪部分即使继续等，也很难事先知道？']
+ },
+ rest:{
+  compassion:['慢下来时，怎样和自己相处','这次解读里有暂停、退一步或恢复的意味。自我关怀关心的是，人在不那么有产出的阶段，是否仍能理解自己的处境，而不是只用表现评价自己。','如果今天不拿完成了多少事来打分，你会怎样描述自己的状态？'],
+  needs:['留一点空间，才听得见自己的意愿','暂停也让人有机会区分自己的需要和外界的要求。自主需要并非远离所有人，而是在关系和任务当中，仍能感到自己的意愿被尊重。','现在的安静更像是在恢复，还是有些需要没有说出来？']
+ },
+ perspective:{
+  reappraisal:['这段经历，你是怎样理解的','这次解读可以作为重新看待一段经历的起点。认知重评研究讨论的是理解方式与情绪反应的关系；新的理解仍需符合事实，不能靠一句积极的话抹掉真实困难。','读完以后，你对这件事多了哪种理解？现实中有什么能支持它？'],
+  needs:['你在这件事里，最希望得到什么','自主、胜任和联结提供了三个不同的观察角度：是否愿意、是否有能力和条件、是否与人有联系。它们能帮助描述期待，不是拿来给自己打分。','你现在最想改变的，是选择的空间、做事的条件，还是相处的感受？']
+ }
+};
+const TOPIC_CODES={
+ fatigue:'3R 8R 28R 30R 31U 31R 48R 65R 76R',
+ worry:'58U 58R',
+ uncertainty:'2U 2R 18U 18R 42U 42R 43R 50R 51U 56U 57U 60R',
+ boundaries:'4U 4R 8U 15U 27R 34R 35R 48U 63U 67U 67R 69R',
+ conflict:'6R 7R 14R 25R 26U 26R 35U 37R 45R 54U 54R 63R 66R 73R',
+ cooperation:'5U 24U 38U 66U 69U',
+ belonging:'3U 6U 14U 17U 19U 25U 37U 41U 45U 49U 72U 73U 76U 77U',
+ transition:'0U 10U 10R 13U 13R 15R 16U 16R 20U 20R 21U 40U 40R 43U 52U 52R 55U 55R 59U 59R 68U 68R',
+ rest:'9U 9R 12U 12R 39U 39R 49R 53U 53R 62R',
+ action:'1U 1R 7U 21R 22U 22R 23U 23R 27U 29U 29R 32U 32R 33U 33R 36U 36R 46U 46R 47U 47R 50U 56R 57R 60U 61U 61R 64U 64R 70U 70R 71U 71R 74U 74R 75U 75R'
+};
+for(const key in TOPIC_CODES)TOPIC_CODES[key]=new Set(TOPIC_CODES[key].split(' '));
+function psychologyTopic(record,positions,context){
+ const story=context.storyKey||'';
+ if(/weary|tired|recovery-blocked|recovery-restarting|warm-but-weary/.test(story))return 'fatigue';
+ if(/unclear|misread|not-fully-known/.test(story))return 'uncertainty';
+ if(/uneven|holding-on|defensive|protected/.test(story))return 'boundaries';
+ if(/friction|differences|mismatch/.test(story))return 'conflict';
+ if(/mutual-care|warm-settling|both-grounded/.test(story))return 'belonging';
+ if(/choice-/.test(story))return 'autonomy';
+ if(context.question&&['unknown','pending','unresolved'].includes(context.question.direction))return 'uncertainty';
+ const primary=context.crush?positions[record.spreadId==='relationship'?1:0]:record.spreadId==='relationship'?positions[2]:positions[0];
+ if(!primary)return 'perspective';
+ const code=String(primary.card.id)+(primary.pick.reversed?'R':'U');
+ return Object.keys(TOPIC_CODES).find(key=>TOPIC_CODES[key].has(code))||'perspective';
+}
+function psychology(record,positions,context={}){
+ const topic=psychologyTopic(record,positions,context);
+ return Object.entries(PSYCH_TOPICS[topic]).map(([key,[title,connection,question]])=>({key,...SOURCES[key],title,connection,question,topic}));
 }
 return {PLAIN,ACTIONS,REV_ACTIONS,WATCH,SOURCES,psychology};
 });
@@ -5356,7 +5432,6 @@ function readingLabels(record){
 function narrativeOverview(positions,story,swap=t=>t){
  const overview=[{title:'一句话解读',text:swap(story.text),lead:true}];
  if(story.body)overview.push({title:'把这几张牌放在一起看',text:swap(story.body),story:true});
- positions.forEach(p=>overview.push({title:`${p.voice.label} · ${p.card.name}${p.pick.reversed?' · 逆位':''}`,text:p.voice.pic+(p.voice.you===swap(story.text)?'':'\n'+p.voice.you),image:p.card.image,reversed:p.pick.reversed}));
  return overview;
 }
 function buildCrushReading(record,spread,positions){
@@ -5369,9 +5444,10 @@ function buildCrushReading(record,spread,positions){
  });
  const story=S.choose(record,positions,true),feelIdx=spread.id==='relationship'?1:0;
  const overview=narrativeOverview(positions,story,swap);
- overview.push({title:'牌面联想 · '+swap('TA 想说的话'),text:swap(`“${D[feelIdx].crush.words}”`),quote:true});
+ positions[feelIdx].voice.quoteTitle='牌面联想 · '+swap('TA 想说的话');
+ positions[feelIdx].voice.quote=swap(`“${D[feelIdx].crush.words}”`);
  const adviceIdx=spread.id==='relationship'?4:feelIdx;
- return {spread,positions,overview,verdict:swap(story.text),storyKey:story.key,questionAnswer:story.question||null,voice:true,crush:true,actionTitle:'如果想回应这组牌',note:swap('这是牌面联想，不是 TA 的真实表态。最后怎么看，还是要以实际相处为准。'),pairs:[],actions:[positions[adviceIdx].practice],psychology:G.psychology({...record,focus:'relationship'},positions),counts:{},reversed:positions.filter(p=>p.pick.reversed).length,courts:0};
+ return {spread,positions,overview,verdict:swap(story.text),storyKey:story.key,questionAnswer:story.question||null,voice:true,crush:true,actionTitle:'如果想回应这组牌',note:swap('这是牌面联想，不是 TA 的真实表态。最后怎么看，还是要以实际相处为准。'),pairs:[],actions:[positions[adviceIdx].practice],psychology:G.psychology({...record,focus:'relationship'},positions,{storyKey:story.key,question:story.question,crush:true}),counts:{},reversed:positions.filter(p=>p.pick.reversed).length,courts:0};
 }
 function buildVoiceReading(record,spread,positions){
  if(isCrushReading(record))return buildCrushReading(record,spread,positions);
@@ -5384,7 +5460,7 @@ function buildVoiceReading(record,spread,positions){
  });
  const story=S.choose(record,positions),overview=narrativeOverview(positions,story);
  const advice=positions.find(p=>p.slot.role==='advice')||positions[0];
- return {spread,positions,overview,verdict:story.text,storyKey:story.key,questionAnswer:story.question||null,voice:true,pairs:[],actionTitle:'如果想回应这组牌',actions:[advice.practice],psychology:G.psychology(record,positions),counts:{},reversed:positions.filter(p=>p.pick.reversed).length,courts:0};
+ return {spread,positions,overview,verdict:story.text,storyKey:story.key,questionAnswer:story.question||null,voice:true,pairs:[],actionTitle:'如果想回应这组牌',actions:[advice.practice],psychology:G.psychology(record,positions,{storyKey:story.key,question:story.question}),counts:{},reversed:positions.filter(p=>p.pick.reversed).length,courts:0};
 }
 function buildReading(record,cards,depth){
  const spread=SPREADS[record.spreadId];if(!spread||record.picks.length!==spread.count)throw new Error('Spread/card count mismatch');
@@ -5543,10 +5619,10 @@ function renderReading(value){
  const pairs=$('pairSections');pairs.replaceChildren();if(reading.pairs.length){reading.pairs.forEach(p=>{const el=document.createElement('article');el.className='pair-block';const h=document.createElement('h4'),names=document.createElement('small'),text=document.createElement('p');h.textContent=p.title;names.textContent=p.cards;text.textContent=p.text;el.append(h,names,text);pairs.append(el);});}else{paragraphBlock(pairs,{title:'单张聚焦的读法',text:'这次只抽一张，重点是把这张牌和你今天的一件具体事连起来。想分开看现状、阻碍和建议，下次可以选三张指引。'},'pair-block');}
  $('psychologyDetails').open=false;const psych=$('psychologySections');psych.replaceChildren();reading.psychology.forEach(p=>{const article=document.createElement('article');article.className='psychology-card';article.innerHTML=`<h3>${esc(p.title)}</h3><p>${esc(p.connection)}</p><h4>理论在说什么</h4><p>${esc(p.evidence)}</p><h4>可以试着问自己</h4><p>${esc(p.question)}</p><details class="psychology-source"><summary>${esc(p.name)} · 来源与适用范围</summary><p>${esc(p.limit)}</p><p class="psychology-citation">${esc(p.citation)}</p><a class="source-link" href="${p.url}" target="_blank" rel="noopener noreferrer">阅读原始资料 ↗</a></details>`;psych.append(article);});
  $('actionSection').hidden=!reading.actions.length;$('actionTitle').textContent=reading.actionTitle||'今天就能做的一件事';$('readingNote').textContent=reading.note||NOTE;$('psychologyDetails').hidden=!reading.psychology.length;$('actionList').replaceChildren(...reading.actions.map(t=>{const li=document.createElement('li');li.textContent=t;return li;}));
- const details=$('positionDetails');details.replaceChildren();reading.positions.forEach(p=>{const d=document.createElement('details');d.className='position-detail';d.id='position-'+p.index;d.open=p.index===0;d.innerHTML=`<summary><span class="detail-index">${String(p.index+1).padStart(2,'0')}</span><img class="detail-thumb" src="${p.card.image}" alt="" style="${p.pick.reversed?'transform:rotate(180deg)':''}"><span class="detail-head"><strong>${esc(p.slot.label)} · ${esc(p.card.name)}</strong><small>${p.pick.reversed?'逆位':'正位'} · ${esc(p.card.keywords.join(' · '))}</small></span></summary><div class="detail-sections">${detailSection('放在这个位置，怎么理解',p.placement,'placement')}${p.context?detailSection('放到你问的主题里',p.context):''}${reading.voice?'':detailSection('可以先做的一步',p.practice)}<details class="extra-meaning"><summary>牌面与完整牌义</summary>${detailSection('牌面象征',p.card.symbol)}${detailSection(p.pick.reversed?'逆位本义':'正位本义',p.traditionalMeaning+p.deep)}${detailSection('这个牌位在问什么',p.slot.description)}${detailSection('花色、数字或角色',p.structure)}${detailSection(p.pick.reversed?'正位的对照含义':'逆位的对照含义',p.pick.reversed?p.card.upright+depth[p.card.id].up:p.card.reversed+depth[p.card.id].down)}${detailSection('值得问自己',p.card.prompt)}</details><a class="source-link" href="${p.card.source}" target="_blank" rel="noopener noreferrer">牌意参考 ↗</a></div>`;details.append(d);});
+ const details=$('positionDetails');details.replaceChildren();reading.positions.forEach(p=>{const d=document.createElement('details');d.className='position-detail';d.id='position-'+p.index;d.open=p.index===0;d.innerHTML=`<summary><span class="detail-index">${String(p.index+1).padStart(2,'0')}</span><img class="detail-thumb" src="${p.card.image}" alt="" style="${p.pick.reversed?'transform:rotate(180deg)':''}"><span class="detail-head"><strong>${esc(p.slot.label)} · ${esc(p.card.name)}</strong><small>${p.pick.reversed?'逆位':'正位'} · ${esc(p.card.keywords.join(' · '))}</small></span></summary><div class="detail-sections">${detailSection('放在这个位置，怎么理解',p.placement,'placement')}${p.voice?.quote?detailSection(p.voice.quoteTitle,p.voice.quote,'quote-block'):''}${p.context?detailSection('放到你问的主题里',p.context):''}${reading.voice?'':detailSection('可以先做的一步',p.practice)}<details class="extra-meaning"><summary>牌面与完整牌义</summary>${detailSection('牌面象征',p.card.symbol)}${detailSection(p.pick.reversed?'逆位本义':'正位本义',p.traditionalMeaning+p.deep)}${detailSection('这个牌位在问什么',p.slot.description)}${detailSection('花色、数字或角色',p.structure)}${detailSection(p.pick.reversed?'正位的对照含义':'逆位的对照含义',p.pick.reversed?p.card.upright+depth[p.card.id].up:p.card.reversed+depth[p.card.id].down)}${detailSection('值得问自己',p.card.prompt)}</details><a class="source-link" href="${p.card.source}" target="_blank" rel="noopener noreferrer">牌意参考 ↗</a></div>`;details.append(d);});
  $('feeling').value=r.note;$('noteStatus').textContent='';$('reflectionText').hidden=!r.reflection;$('reflectionText').textContent=r.reflection;$('copyReflectionBtn').hidden=!r.reflection;switchTab('overview');renderBrief();historyStatus();
 }
-function readingText(r=current){if(!r)return '';const result=E.buildReading(r,cards,depth);const parts=['未读神谕 · '+dateLabel(r.createdAt),result.spread.name+' / '+r.period+' / '+E.FOCUS_NAMES[r.focus],r.question?'我的问题：'+r.question:''];if(r.spreadId==='choice')parts.push('A：'+r.options.a+'\nB：'+r.options.b);(result.voice?result.overview.filter(b=>b.lead||b.quote||b.story):result.overview).forEach(b=>parts.push('\n【'+b.title+'】\n'+b.text));result.pairs.forEach(b=>parts.push('\n【'+b.title+'】\n'+b.cards+'\n'+b.text));if(result.voice)result.positions.forEach(p=>parts.push(`\n【${p.voice.label}：${p.card.name} · ${p.pick.reversed?'逆位':'正位'}】\n${p.placement}`));else result.positions.forEach(p=>parts.push(`\n【${p.index+1}. ${p.slot.label}：${p.card.name} · ${p.pick.reversed?'逆位':'正位'}】\n牌位：${p.slot.description}\n象征：${p.card.symbol}\n白话解释：${p.meaning}\n传统牌义：${p.traditionalMeaning}${p.deep}\n结构：${p.structure}\n此位置的解读：${p.placement}\n主题对照：${p.context}\n行动：${p.practice}\n核对：${p.card.prompt}`));result.psychology.forEach(p=>parts.push('\n【心理学视角：'+p.title+'】\n'+p.connection+'\n'+p.evidence+'\n反思练习：'+p.question+'\n适用范围：'+p.limit+'\n来源：'+p.citation+'\n'+p.url));if(result.actions.length)parts.push('\n可带走的行动：\n'+result.actions.map((t,i)=>(i+1)+'. '+t).join('\n'));if(r.note)parts.push('\n我的感受与理解：\n'+r.note);parts.push('\n'+(result.note||NOTE));return parts.filter(Boolean).join('\n');}
+function readingText(r=current){if(!r)return '';const result=E.buildReading(r,cards,depth);const parts=['未读神谕 · '+dateLabel(r.createdAt),result.spread.name+' / '+r.period+' / '+E.FOCUS_NAMES[r.focus],r.question?'我的问题：'+r.question:''];if(r.spreadId==='choice')parts.push('A：'+r.options.a+'\nB：'+r.options.b);(result.voice?result.overview.filter(b=>b.lead||b.quote||b.story):result.overview).forEach(b=>parts.push('\n【'+b.title+'】\n'+b.text));result.pairs.forEach(b=>parts.push('\n【'+b.title+'】\n'+b.cards+'\n'+b.text));if(result.voice)result.positions.forEach(p=>parts.push(`\n【${p.voice.label}：${p.card.name} · ${p.pick.reversed?'逆位':'正位'}】\n${p.placement}${p.voice.quote?'\n'+p.voice.quoteTitle+'：'+p.voice.quote:''}`));else result.positions.forEach(p=>parts.push(`\n【${p.index+1}. ${p.slot.label}：${p.card.name} · ${p.pick.reversed?'逆位':'正位'}】\n牌位：${p.slot.description}\n象征：${p.card.symbol}\n白话解释：${p.meaning}\n传统牌义：${p.traditionalMeaning}${p.deep}\n结构：${p.structure}\n此位置的解读：${p.placement}\n主题对照：${p.context}\n行动：${p.practice}\n核对：${p.card.prompt}`));result.psychology.forEach(p=>parts.push('\n【心理学视角：'+p.title+'】\n'+p.connection+'\n'+p.evidence+'\n反思练习：'+p.question+'\n适用范围：'+p.limit+'\n来源：'+p.citation+'\n'+p.url));if(result.actions.length)parts.push('\n可带走的行动：\n'+result.actions.map((t,i)=>(i+1)+'. '+t).join('\n'));if(r.note)parts.push('\n我的感受与理解：\n'+r.note);parts.push('\n'+(result.note||NOTE));return parts.filter(Boolean).join('\n');}
 async function copy(text){try{if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(text);else{const t=document.createElement('textarea');t.value=text;t.style.position='fixed';t.style.opacity='0';document.body.append(t);t.select();const ok=document.execCommand('copy');t.remove();if(!ok)throw Error('copy');}toast('已复制完整内容');}catch{toast('未能自动复制，请选中文字复制');}}
 function saveNote(){if(!current)return;current.note=$('feeling').value.trim().slice(0,3000);updateRecord();$('noteStatus').textContent=storageOK?'已保存':'未能保存，请先复制';}
 function organize(){if(!current)return;saveNote();current.reflection=readingText(current);updateRecord();$('reflectionText').hidden=false;$('reflectionText').textContent=current.reflection;$('copyReflectionBtn').hidden=false;toast('已把牌阵、解读和你的感受合成一份，可以复制带走');}
