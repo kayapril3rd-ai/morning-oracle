@@ -80,6 +80,12 @@ body{isolation:isolate}.nebula{opacity:.5}.stage-status .stage-counts:has(#remai
 .compact-footer>div{display:flex;gap:22px;align-items:center}.ai-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-top:12px}.ai-status{font-size:13px;color:#c9b6d3;line-height:1.8;white-space:pre-line}.reading-ai-tools{margin:8px 0 18px}.ai-tools button:disabled{opacity:.65}.ai-badge{color:var(--gold);font-size:12px;margin-bottom:8px}.ai-settings-dialog{max-width:600px}.ai-settings-form>label:not(.ai-remember){display:block;color:#d7c2e0;font-size:14px;margin:18px 0 7px}.ai-settings-form input:not([type=checkbox]),.ai-settings-form select{display:block;width:100%;margin-top:7px;padding:11px 12px;background:#18111f;border:1px solid #b299c24d;color:var(--text);border-radius:6px;font-size:16px;min-width:0}.ai-remember{display:flex;align-items:flex-start;gap:10px;font-size:14px;margin-top:20px}.ai-remember input{margin-top:7px;accent-color:#d7b981}.ai-disclosure{font-size:13px;line-height:1.9;color:#cbb6d5;border-top:1px solid var(--line);padding-top:16px;margin-top:20px}.ai-disclosure a{display:block}.ai-settings-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin-top:20px}.ai-settings-actions button{font-size:14px}.ai-settings-form .psychology-note{font-size:12px;margin:8px 0}.ai-settings-form .source-link{font-size:13px}.ai-source-line{font-size:12px;color:var(--gold)}
 @media(max-width:740px){.compact-footer{flex-wrap:wrap;gap:12px}.compact-footer>div{gap:18px}.ai-settings-dialog{padding:22px}.ai-settings-actions{gap:10px 15px}.ai-tools{align-items:flex-start}.ai-tools button{font-size:14px}}
 
+/* While AI is generating, do not present authored prose as its result. */
+#reading[data-ai-pending="true"] #briefReading,
+#readingDialog[data-ai-pending="true"] #overviewPane,
+#readingDialog[data-ai-pending="true"] #detailsPane{display:none}
+.ai-tools button[hidden]{display:none}
+
 </style>
 </head>
 <body style="background-color:#100d18;color:#efe7f4">
@@ -114,22 +120,22 @@ body{isolation:isolate}.nebula{opacity:.5}.stage-status .stage-counts:has(#remai
   <span id="drawStep" class="visually-hidden"></span><span id="drawHelp" hidden></span><span id="deckState" hidden></span>
  </div>
 </section>
-<section id="reading" class="compact-reading" hidden aria-labelledby="readingTitle"><div class="compact-reading-heading"><div><h2 id="readingTitle">本次解读</h2><span id="readingDate"></span></div><div><button id="viewReportBtn" class="text-button">完整解读 ↗</button><button id="viewJournalBtn" class="text-button">我的手记 ↗</button></div></div><div id="briefReading"></div><div class="ai-tools"><button id="enhanceReadingBtn" class="text-button">用 AI 再读一次 ↗</button><span id="briefAiStatus" class="ai-status" role="status"></span></div></section>
+<section id="reading" class="compact-reading" hidden aria-labelledby="readingTitle"><div class="compact-reading-heading"><div><h2 id="readingTitle">本次解读</h2><span id="readingDate"></span></div><div><button id="viewReportBtn" class="text-button">完整解读 ↗</button><button id="viewJournalBtn" class="text-button">我的手记 ↗</button></div></div><div id="briefReading"></div><div class="ai-tools"><button id="enhanceReadingBtn" class="text-button" hidden>重试 AI 解读</button><span id="briefAiStatus" class="ai-status" role="status"></span></div></section>
 </main>
-<footer class="compact-footer"><span id="dateText"></span><div><button id="aiSettingsBtn">AI 解读 · 可选</button><button id="aboutBtn">牌意与来源 ↗</button></div></footer>
+<footer class="compact-footer"><span id="dateText"></span><div><button id="aiSettingsBtn">接入 AI 解读</button><button id="aboutBtn">牌意与来源 ↗</button></div></footer>
 <dialog id="setupChangeDialog" class="dialog setup-change-dialog" aria-labelledby="setupChangeTitle" aria-describedby="setupChangeText"><h2 id="setupChangeTitle">切换并重新选牌？</h2><p id="setupChangeText"></p><div class="setup-change-actions"><button id="keepSetupBtn" class="secondary-button" autofocus>继续当前抽牌</button><button id="confirmSetupBtn" class="primary-button slim">切换并重新选牌</button></div></dialog>
 <dialog id="readingDialog" class="dialog reading-dialog"><div class="dialog-header"><div><h2 id="dialogReadingTitle">牌阵解读</h2></div><button class="close-dialog" aria-label="关闭解读">×</button><div class="reading-tabs expanded-tabs" role="tablist" aria-label="完整解读"><button role="tab" id="overviewTab" aria-controls="overviewPane" aria-selected="true">整体</button><button role="tab" id="detailsTab" aria-controls="detailsPane" aria-selected="false" tabindex="-1">逐张</button><button role="tab" id="journalTab" aria-controls="journalPane" aria-selected="false" tabindex="-1">手记</button></div></div><details class="reading-context"><summary>本次问题与牌阵说明</summary><div class="question-quote" id="questionQuote" hidden></div><p id="readingScope" class="reading-scope"></p><p id="layoutNote" class="layout-note" hidden>第二张横放表示交叉影响，正逆位仍按抽取方向解释。</p></details>
- <div class="ai-tools reading-ai-tools"><button id="aiReadingBtn" class="text-button">用 AI 再读一次 ↗</button><span id="aiReadingStatus" class="ai-status" role="status"></span><button id="staticReadingBtn" class="text-button" hidden>看手写解读</button></div>
+ <div class="ai-tools reading-ai-tools"><button id="aiReadingBtn" class="text-button" hidden>重试 AI 解读</button><span id="aiReadingStatus" class="ai-status" role="status"></span></div>
  <div role="tabpanel" id="overviewPane" aria-labelledby="overviewTab"><div id="overviewSections" class="overview-sections"></div><details id="pairDetails" class="psychology-details"><summary>这几张牌怎么一起看</summary><div id="pairSections" class="pair-sections"></div></details><details id="psychologyDetails" class="psychology-details"><summary>用心理学方法，把牌意落到生活里</summary><p class="psychology-note">这里从本次解读谈到的生活体验出发，提供相关的心理学解释。牌义与理论的联系是阅读参考，不能用来测评、诊断，或判断别人的真实想法。</p><div id="psychologySections"></div></details><section class="action-section" id="actionSection"><span class="eyebrow">TAKE IT INTO REAL LIFE</span><h3 id="actionTitle">今天就能做的一件事</h3><ol id="actionList"></ol></section><p class="psychology-note reading-note" id="readingNote">塔罗是一面帮你看清自己的镜子，最后怎么走还是你说了算。</p></div>
  <div role="tabpanel" id="detailsPane" aria-labelledby="detailsTab" hidden><div id="positionDetails" class="position-details"></div></div>
  <div role="tabpanel" id="journalPane" aria-labelledby="journalTab" hidden><div class="journal-panel expanded-journal"><div class="journal-title"><span>✧</span><div><h3>说说你的第一感觉</h3><p>写一句就好，牌会接着你的话说。</p><p id="journalAiNotice" class="psychology-note" hidden>启用 AI 后，点“说给牌听”会把这段手记、本次问题和解读结论发给 OpenRouter 及实际模型提供方。</p></div></div><label for="feeling" class="visually-hidden">我的第一感觉</label><div class="feeling-row"><textarea id="feeling" rows="2" maxlength="3000" placeholder="比如：我感觉还在观望……"></textarea><button id="saveNoteBtn" class="primary-button slim">说给牌听 ✦</button></div><span id="noteStatus" aria-live="polite"></span><div id="reflectionText" class="ai-reading feeling-reply" aria-live="polite" hidden></div><button id="copyReflectionBtn" class="text-button" hidden>复制这段话 ↗</button></div></div>
  <div class="reading-bottom"><span id="storageNote">本次牌阵已收进手记</span><div><button id="copyReadingBtn" class="text-button">复制完整解读</button><button id="saveImageBtn" class="text-button">保存牌阵图片 ↓</button></div></div></dialog>
 <dialog id="historyDialog" class="dialog"><div class="dialog-header"><div><span class="eyebrow">YOUR LITTLE CONSTELLATION</span><h2>抽牌手记</h2></div><button class="close-dialog" aria-label="关闭手记">×</button></div><p class="dialog-intro">那些曾经与你相遇的牌。</p><div id="historyList" class="history-list"></div><p class="dialog-footnote">保存在当前浏览器，最多保留 90 次记录。清除浏览器数据会清除手记。</p></dialog>
 <dialog id="libraryDialog" class="dialog library-dialog"><div class="dialog-header"><div><span class="eyebrow">THE LANGUAGE OF SYMBOLS</span><h2>牌意图鉴</h2></div><button class="close-dialog" aria-label="关闭图鉴">×</button></div><div class="library-filters" id="libraryFilters"><button class="selected" data-suit="all">全部 78</button><button data-suit="major">大阿卡那</button><button data-suit="wands">权杖</button><button data-suit="cups">圣杯</button><button data-suit="swords">宝剑</button><button data-suit="pentacles">星币</button></div><div id="libraryGrid" class="library-grid"></div><div id="libraryDetail" hidden></div></dialog>
-<dialog id="aboutDialog" class="dialog about-dialog"><div class="dialog-header"><div><span class="eyebrow">BEHIND THE ORACLE</span><h2>关于牌意与来源</h2></div><button class="close-dialog" aria-label="关闭说明">×</button></div><p>使用完整的 78 张 Rider–Waite–Smith 塔罗牌。牌面由 Pamela Colman Smith 绘制，原版出版于 1909 年；此处使用早期原版扫描图。</p><p>中文牌意结合韦特体系的图像象征与常见现代解读整理。逆位可能体现能量的受阻、内化、过度或失衡，并非单纯的正位反义词；具体解释也会因问题和流派而不同。</p><p>每次从完整78张牌中不放回抽取。单张、三张、工作、关系与选择牌阵用于不同阅读目标，其中主题式牌阵为本页组织的阅读结构，并非每类问题的唯一标准。凯尔特十字依韦特十张牌位结构，不另取人物指示牌。</p><p>完整解读包含牌面象征、正逆位本义、所在牌位的含义与组牌联系。逆位的读法要结合具体牌义，可能是受阻、过度，也可能是恢复或松动；正位在阻碍位则要看它是否用过了头。问题会按关键词识别感情、暧昧与常见是非问句，选择对应的解读。是非倾向来自具体牌义和实际牌位，无结果位时给的是当前处境的条件性方向；它不是预测概率。未启用 AI 时，手记按感受关键词回应，问题和感受只保存在当前浏览器。你也可以接入自己的 OpenRouter Key，再点击“用 AI 再读一次”，让 AI 围绕本次问题生成解读。</p><a href="https://sacred-texts.com/book/the-pictorial-key-to-the-tarot/section-7-an-ancient-celtic-method-of-divination" target="_blank" rel="noopener noreferrer">凯尔特十字牌位参考 ↗</a><p>抽牌可用来整理感受和审视选择，牌面不保证未来事件会发生，也不能代替对现实信息的判断。</p><a href="https://sacred-texts.com/book/the-pictorial-key-to-the-tarot" target="_blank" rel="noopener noreferrer">A. E. Waite · The Pictorial Key to the Tarot ↗</a><a href="https://github.com/mixvlad/TarotCards/blob/main/SOURCES.md" target="_blank" rel="noopener noreferrer">原版牌面扫描与来源说明 ↗</a><p class="dialog-footnote">手写解读无需注册或登录。AI 是可选功能，需要你自己的 OpenRouter 账号与 Key；只有主动使用 AI 时，相关问题、牌面或手记才会发给 OpenRouter 及实际模型提供方。</p></dialog>
+<dialog id="aboutDialog" class="dialog about-dialog"><div class="dialog-header"><div><span class="eyebrow">BEHIND THE ORACLE</span><h2>关于牌意与来源</h2></div><button class="close-dialog" aria-label="关闭说明">×</button></div><p>使用完整的 78 张 Rider–Waite–Smith 塔罗牌。牌面由 Pamela Colman Smith 绘制，原版出版于 1909 年；此处使用早期原版扫描图。</p><p>中文牌意结合韦特体系的图像象征与常见现代解读整理。逆位可能体现能量的受阻、内化、过度或失衡，并非单纯的正位反义词；具体解释也会因问题和流派而不同。</p><p>每次从完整78张牌中不放回抽取。单张、三张、工作、关系与选择牌阵用于不同阅读目标，其中主题式牌阵为本页组织的阅读结构，并非每类问题的唯一标准。凯尔特十字依韦特十张牌位结构，不另取人物指示牌。</p><p>完整解读包含牌面象征、正逆位本义、所在牌位的含义与组牌联系。逆位的读法要结合具体牌义，可能是受阻、过度，也可能是恢复或松动；正位在阻碍位则要看它是否用过了头。问题会按关键词识别感情、暧昧与常见是非问句，选择对应的解读。是非倾向来自具体牌义和实际牌位，无结果位时给的是当前处境的条件性方向；它不是预测概率。未启用 AI 时，手记按感受关键词回应，问题和感受只保存在当前浏览器。启用自己的 OpenRouter Key 后，翻牌会自动生成 AI 解读，整体与逐张同步更新；生成失败时保留基础解读，并可重试。</p><a href="https://sacred-texts.com/book/the-pictorial-key-to-the-tarot/section-7-an-ancient-celtic-method-of-divination" target="_blank" rel="noopener noreferrer">凯尔特十字牌位参考 ↗</a><p>抽牌可用来整理感受和审视选择，牌面不保证未来事件会发生，也不能代替对现实信息的判断。</p><a href="https://sacred-texts.com/book/the-pictorial-key-to-the-tarot" target="_blank" rel="noopener noreferrer">A. E. Waite · The Pictorial Key to the Tarot ↗</a><a href="https://github.com/mixvlad/TarotCards/blob/main/SOURCES.md" target="_blank" rel="noopener noreferrer">原版牌面扫描与来源说明 ↗</a><p class="dialog-footnote">手写解读无需注册或登录。AI 是可选功能，需要你自己的 OpenRouter 账号与 Key；启用后，翻牌或打开尚未生成 AI 解读的记录，会将本次问题和牌面发给 OpenRouter 及实际模型提供方；点击“说给牌听”还会发送这段手记。</p></dialog>
 <dialog id="aiSettingsDialog" class="dialog ai-settings-dialog" aria-labelledby="aiSettingsTitle">
  <div class="dialog-header"><h2 id="aiSettingsTitle">接入 AI 解读</h2><button class="close-dialog" aria-label="关闭 AI 设置">×</button></div>
- <p class="dialog-intro">可以先抽牌、看手写解读，想聊得更贴近问题时，再用自己的 AI。</p>
+ <p class="dialog-intro">未启用时使用网站的基础解读；启用后，翻牌将自动生成 AI 解读。</p>
  <div id="aiSettingsForm" class="ai-settings-form">
   <label for="aiProvider">服务商<select id="aiProvider"><option value="openrouter">OpenRouter · 免费模型</option></select></label>
   <a class="source-link" href="https://openrouter.ai/settings/keys" target="_blank" rel="noopener noreferrer">去 OpenRouter 申请自己的 Key ↗</a>
@@ -138,7 +144,7 @@ body{isolation:isolate}.nebula{opacity:.5}.stage-status .stage-counts:has(#remai
   <p id="aiModelHint" class="psychology-note">默认自动选择免费模型，也可填以 :free 结尾的模型名。未充值账号通常每天50次，失败请求也可能计入额度；不自动切换付费模型。</p>
   <label class="ai-remember"><input id="aiRemember" type="checkbox"><span>记住 Key，下次在这个浏览器继续使用</span></label>
   <p class="psychology-note">默认只在本次页面打开时使用，刷新或关闭后要重新填写。勾选后会保存到当前浏览器，避免在共用设备上勾选。</p>
-  <p class="ai-disclosure">点击生成时，本次问题和牌面会发给 OpenRouter 及实际模型提供方；“说给牌听”还会发送你写的这段手记。Key 仅发给 OpenRouter，不写进手记、导出或网站代码。<a class="source-link" href="https://openrouter.ai/docs/guides/privacy/data-collection" target="_blank" rel="noopener noreferrer">查看数据说明 ↗</a></p>
+  <p class="ai-disclosure">启用后，翻牌或打开尚未生成 AI 解读的记录时，本次问题和牌面会发给 OpenRouter 及实际模型提供方；“说给牌听”还会发送你写的这段手记。Key 仅发给 OpenRouter，不写进手记、导出或网站代码。<a class="source-link" href="https://openrouter.ai/docs/guides/privacy/data-collection" target="_blank" rel="noopener noreferrer">查看数据说明 ↗</a></p>
   <div class="ai-settings-actions"><button type="button" id="aiEnableBtn" class="primary-button slim">启用 AI</button><button type="button" id="aiTestBtn" class="text-button">测试连接</button><button type="button" id="aiClearBtn" class="text-button">清除 Key</button></div>
   <p id="aiConnectionStatus" class="ai-status" role="status"></p>
  </div>
@@ -5956,7 +5962,7 @@ return {SPREADS,FOCUS_NAMES,SUITS,isCrushQuestion,pronounFor,createDeck,normaliz
 'use strict';
 // Credentials are held by the settings UI, never by a reading or its export.
 const ENDPOINT='https://openrouter.ai/api/v1/chat/completions';
-const DEFAULT_MODEL='openrouter/free',TIMEOUT=20000;
+const DEFAULT_MODEL='openrouter/free',TIMEOUT=60000;
 class AIError extends Error{constructor(code){super(code);this.name='AIError';this.code=code;}}
 const fail=code=>{throw new AIError(code);};
 function freeModel(model){return typeof model==='string'&&(model===DEFAULT_MODEL||/^[a-z0-9][a-z0-9._-]*\/[a-z0-9][a-z0-9._-]*:free$/i.test(model));}
@@ -5978,11 +5984,11 @@ function text(value,min,max){if(typeof value!=='string')fail('format');const v=v
 function parse(content){if(typeof content!=='string'||content.length>24000)fail('format');try{return JSON.parse(content.trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,''));}catch{fail('format');}}
 function validate(value,record,reading){
  if(!value||typeof value!=='object'||Array.isArray(value))fail('format');
- const lead=text(value.lead,8,220),body=text(value.body,80,160),action=text(value.action,5,240);
+ const lead=text(value.lead,8,400),body=text(value.body,40,1200),action=text(value.action,5,500);
  if(!['leaning-yes','leaning-no','conditional','open'].includes(value.direction))fail('format');
  if(reading.questionAnswer&&value.direction==='open')fail('format');
  if(!Array.isArray(value.positions)||value.positions.length!==record.picks.length)fail('format');
- const positions=record.picks.map((_,i)=>{const p=value.positions[i];if(!p||p.index!==i)fail('format');return {index:i,text:text(p.text,5,320)};});
+ const positions=record.picks.map((_,i)=>{const p=value.positions[i];if(!p||p.index!==i)fail('format');return {index:i,text:text(p.text,5,1000)};});
  const words=reading.crush?text(value.words,5,180):'';
  // Construct a whitelist; extra response properties never enter history.
  return {lead,body,direction:value.direction,positions,action,words};
@@ -6009,7 +6015,7 @@ function readingMessages(record,reading,voice){
  return [{role:'system',content:WRITING+'\nJSON结构：{"lead":"直接回答问题的一句话","direction":"leaning-yes / leaning-no / conditional / open 四选一","body":"80至160字的整体解释，建议90至140字","positions":[{"index":0,"text":"该位置扣着问题的1至2句解读"}],"action":"一件可做的小事","words":"感情问题写想象独白，其他写空字符串"}。positions按所给位置顺序，每个位置恰好一次。'},
  {role:'user',content:JSON.stringify({question:record.question||'这次想了解眼下的状态',theme:reading.crush?'感情与暧昧':record.focus,spread:reading.spread.name,period:record.period,options:record.spreadId==='choice'?record.options:undefined,closedQuestion:!!reading.questionAnswer,romance:!!reading.crush,cards:material})}];
 }
-async function request(settings,messages,{fetchImpl=globalThis.fetch,signal,timeout=TIMEOUT,maxTokens=2600}={}){
+async function request(settings,messages,{fetchImpl=globalThis.fetch,signal,timeout=TIMEOUT,maxTokens=5000}={}){
  if(!settings?.key||typeof settings.key!=='string'||/[\r\n]/.test(settings.key))fail('key');
  if(!freeModel(settings.model))fail('model');
  const controller=new AbortController();let timer,abortHandler;
@@ -6023,7 +6029,7 @@ async function request(settings,messages,{fetchImpl=globalThis.fetch,signal,time
    const response=await fetchImpl(ENDPOINT,{method:'POST',mode:'cors',credentials:'omit',redirect:'error',referrerPolicy:'no-referrer',headers:{'Content-Type':'application/json',Authorization:'Bearer '+settings.key},body:JSON.stringify({model:settings.model,messages,stream:false,max_tokens:maxTokens,response_format:{type:'json_object'},provider:{data_collection:'deny',require_parameters:true,max_price:{prompt:0,completion:0,request:0}}}),signal:controller.signal});
    if(!response.ok)fail(response.status===401||response.status===403?'auth':response.status===429?'quota':response.status===402?'balance':response.status===404?'unavailable':'service');
    const raw=await response.text();if(raw.length>120000)fail('format');let value;try{value=JSON.parse(raw);}catch{fail('format');}
-   if(value.error)fail('service');return value.choices?.[0]?.message?.content;
+   if(value.error)fail('service');const choice=value.choices?.[0];if(choice?.finish_reason==='length')fail('truncated');return choice?.message?.content;
   })();
   return await Promise.race([work,stopped]);
  }catch(e){if(e instanceof AIError)throw e;if(signal?.aborted)fail('cancelled');fail('network');}
@@ -6039,7 +6045,7 @@ async function reflect(settings,note,record,reading,options){
  return text(parse(await request(settings,messages,{...options,maxTokens:1000})).reply,40,500);
 }
 async function test(settings,options){const value=parse(await request(settings,[{role:'user',content:'Connectivity test only. Reply with exactly this JSON: {"ok":true}'}],{...options,maxTokens:100}));if(value?.ok!==true)fail('format');return true;}
-function message(error){return {key:'先填入你自己的 API Key。',storage:'浏览器未能更改 Key 的保存设置，请检查浏览器权限。',model:'这里只能使用 openrouter/free 或以 :free 结尾的免费模型。',auth:'Key 未通过验证，请检查 Key 和账号权限。',quota:'免费额度暂时用完或请求太密，稍后再试。',balance:'服务商拒绝了当前额度，未切换到付费模型。',unavailable:'这个免费模型暂时不可用，可以换回自动选择。',service:'免费服务暂时没有返回结果，稍后再试。',timeout:'等了20秒还没收到结果，先看手写解读。',network:'网页暂时连不上 OpenRouter，请检查网络。',format:'AI 返回的内容不完整，先看手写解读。',cancelled:'已停止这次生成。'}[error?.code]||'这次没能生成，先看手写解读。';}
+function message(error){return {key:'先填入你自己的 API Key。',storage:'浏览器未能更改 Key 的保存设置，请检查浏览器权限。',model:'这里只能使用 openrouter/free 或以 :free 结尾的免费模型。',auth:'Key 未通过验证，请检查 Key 和账号权限。',quota:'免费额度暂时用完或请求太密，稍后再试。',balance:'服务商拒绝了当前额度，未切换到付费模型。',unavailable:'这个免费模型暂时不可用，可以换回自动选择。',service:'免费服务暂时没有返回结果，稍后再试。',timeout:'这次等待超时，未能生成 AI 解读。',network:'网页暂时连不上 OpenRouter，请检查网络。',format:'AI 返回的内容不完整，未能生成解读。',truncated:'AI 的回复未生成完整，请重试。',cancelled:'已停止这次生成。'}[error?.code]||'这次没能生成，先看手写解读。';}
 return {ENDPOINT,DEFAULT_MODEL,TIMEOUT,AIError,freeModel,createSettingsStore,signature,validate,stored,apply,readingMessages,generate,reflect,test,message};
 });
 
@@ -6055,7 +6061,7 @@ const dateLabel=x=>new Intl.DateTimeFormat('zh-CN',{month:'long',day:'numeric'})
 let history=[],storageOK=true,current=null,reading=null,focus='daily',spreadId='daily',mode='ready',deck=[],selected=[],session=null,sound=false,audio=null,toastTimer,generation=0;
 let credentialStorage;try{credentialStorage=localStorage;}catch{}
 const aiSettings=A.createSettingsStore(credentialStorage);
-let aiRequest=null,reflectionRequest=null,connectionRequest=null,aiViewStatic=false;
+let aiRequest=null,reflectionRequest=null,connectionRequest=null,aiFailures=new Map();
 const NOTE='塔罗是一面帮你看清自己的镜子，最后怎么走还是你说了算。';
 const recommended={daily:'daily',work:'work',relationship:'relationship',choice:'choice',self:'guidance'};
 function rand(max){if(crypto?.getRandomValues){const a=new Uint32Array(1),limit=Math.floor(4294967296/max)*max;do{crypto.getRandomValues(a);}while(a[0]>=limit);return a[0]%max;}return Math.floor(Math.random()*max);}
@@ -6168,7 +6174,7 @@ function switchTab(name){for(const key of ['overview','details','journal']){cons
 function paragraphBlock(container,block,cls='overview-block'){const el=document.createElement(block.extra?'details':'article');el.className=cls+(block.lead?' verdict-block':'')+(block.quote?' quote-block':'')+(block.image?' voice-card':'');const h=document.createElement(block.extra?'summary':'h3'),p=document.createElement('p');h.textContent=block.title;p.textContent=block.text;if(block.image){const img=document.createElement('img');img.src=block.image;img.alt='';img.className='voice-thumb';if(block.reversed)img.style.transform='rotate(180deg)';const body=document.createElement('div');body.append(h,p);el.append(img,body);}else el.append(h,p);container.append(el);}
 function detailSection(title,text,cls=''){return `<section class="detail-section ${cls}"><h4>${esc(title)}</h4><p>${esc(text)}</p></section>`;}
 function renderReading(value){
- const r=E.normalizeRecord(value,cards);if(!r)return;cancelAIRequests();if(current?.id!==r.id)aiViewStatic=false;current=r;reading=displayReading(r);generation++;mode='revealed';spreadId=r.spreadId;setFocus(r.focus);setLocked(false);$('spreadSelect').value=spreadId;$('periodSelect').value=[...$('periodSelect').options].some(o=>o.value===r.period)?r.period:'今天';$('optionA').value=r.options.a==='选项 A'?'':r.options.a;$('optionB').value=r.options.b==='选项 B'?'':r.options.b;$('question').value=r.question;$('spreadDescription').textContent=reading.spread.description;$('choiceFields').hidden=spreadId!=='choice';
+ const r=E.normalizeRecord(value,cards);if(!r)return;cancelAIRequests();current=r;reading=displayReading(r);generation++;mode='revealed';spreadId=r.spreadId;setFocus(r.focus);setLocked(false);$('spreadSelect').value=spreadId;$('periodSelect').value=[...$('periodSelect').options].some(o=>o.value===r.period)?r.period:'今天';$('optionA').value=r.options.a==='选项 A'?'':r.options.a;$('optionB').value=r.options.b==='选项 B'?'':r.options.b;$('question').value=r.question;$('spreadDescription').textContent=reading.spread.description;$('choiceFields').hidden=spreadId!=='choice';
  const order=r.deckOrder,indices=r.selectionIndices;const restoreOrder=Array.isArray(order)&&order.length===78&&new Set(order).size===78&&order.every(n=>Number.isInteger(n)&&n>=0&&n<78)&&Array.isArray(indices)&&indices.length===r.picks.length&&new Set(indices).size===indices.length&&indices.every((n,i)=>order[n]===r.picks[i].cardId);
  deck=(restoreOrder?order:cards.map(c=>c.id)).map(cardId=>({cardId,reversed:false}));selected=r.picks.map((p,i)=>restoreOrder?indices[i]:p.cardId);selected.forEach((index,i)=>deck[index].reversed=r.picks[i].reversed);updatePreview();updateDeck();$('shuffleBtn').disabled=false;$('shuffleLabel').textContent='换个问题，重新洗牌';
  $('reading').hidden=false;$('readingTitle').textContent=reading.spread.name+' · 完整解读';$('readingDate').textContent=dateLabel(r.createdAt)+' · '+r.picks.length+' 张'+(r.firstOfDay?' · 当日初抽':'');$('readingScope').textContent=E.FOCUS_NAMES[r.focus]+' / '+r.period+(r.spreadId==='choice'?` / A：${r.options.a}　B：${r.options.b}`:'');$('questionQuote').hidden=!r.question;$('questionQuote').textContent=r.question?'本次问题：'+r.question:'';$('layoutNote').hidden=r.spreadId!=='celtic';
@@ -6179,7 +6185,7 @@ function renderReading(value){
  $('psychologyDetails').open=false;const psych=$('psychologySections');psych.replaceChildren();reading.psychology.forEach(p=>{const article=document.createElement('article');article.className='psychology-card';article.innerHTML=`<h3>${esc(p.title)}</h3><p>${esc(p.connection)}</p><h4>理论在说什么</h4><p>${esc(p.evidence)}</p><h4>可以试着问自己</h4><p>${esc(p.question)}</p><details class="psychology-source"><summary>${esc(p.name)} · 来源与适用范围</summary><p>${esc(p.limit)}</p><p class="psychology-citation">${esc(p.citation)}</p><a class="source-link" href="${p.url}" target="_blank" rel="noopener noreferrer">阅读原始资料 ↗</a></details>`;psych.append(article);});
  $('actionSection').hidden=!reading.actions.length;$('actionTitle').textContent=reading.actionTitle||'今天就能做的一件事';$('readingNote').textContent=reading.note||NOTE;$('psychologyDetails').hidden=!reading.psychology.length;$('actionList').replaceChildren(...reading.actions.map(t=>{const li=document.createElement('li');li.textContent=t;return li;}));
  const details=$('positionDetails');details.replaceChildren();reading.positions.forEach(p=>{const d=document.createElement('details');d.className='position-detail';d.id='position-'+p.index;d.open=p.index===0;d.innerHTML=`<summary><span class="detail-index">${String(p.index+1).padStart(2,'0')}</span><img class="detail-thumb" src="${p.card.image}" alt="" style="${p.pick.reversed?'transform:rotate(180deg)':''}"><span class="detail-head"><strong>${esc(p.slot.label)} · ${esc(p.card.name)}</strong><small>${p.pick.reversed?'逆位':'正位'} · ${esc(p.card.keywords.join(' · '))}</small></span></summary><div class="detail-sections">${detailSection('放在这个位置，怎么理解',p.placement,'placement')}${p.voice?.quote?detailSection(p.voice.quoteTitle,p.voice.quote,'quote-block'):''}${p.context?detailSection('放到你问的主题里',p.context):''}${reading.voice?'':detailSection('可以先做的一步',p.practice)}<details class="extra-meaning"><summary>牌面与完整牌义</summary>${detailSection('牌面象征',p.card.symbol)}${detailSection(p.pick.reversed?'逆位本义':'正位本义',p.traditionalMeaning+p.deep)}${detailSection('这个牌位在问什么',p.slot.description)}${detailSection('花色、数字或角色',p.structure)}${detailSection(p.pick.reversed?'正位的对照含义':'逆位的对照含义',p.pick.reversed?p.card.upright+depth[p.card.id].up:p.card.reversed+depth[p.card.id].down)}${detailSection('值得问自己',p.card.prompt)}</details><a class="source-link" href="${p.card.source}" target="_blank" rel="noopener noreferrer">牌意参考 ↗</a></div>`;details.append(d);});
- $('feeling').value=r.note;$('noteStatus').textContent='';$('reflectionText').hidden=!r.reflection;$('reflectionText').textContent=r.reflection;if(r.reflectionSource==='ai')$('noteStatus').textContent='AI 回应 · 已保存';$('copyReflectionBtn').hidden=!r.reflection;switchTab('overview');renderBrief();historyStatus();updateAIControls();
+ $('feeling').value=r.note;$('noteStatus').textContent='';$('reflectionText').hidden=!r.reflection;$('reflectionText').textContent=r.reflection;if(r.reflectionSource==='ai')$('noteStatus').textContent='AI 回应 · 已保存';$('copyReflectionBtn').hidden=!r.reflection;switchTab('overview');renderBrief();historyStatus();updateAIControls();ensureAIReading();
 }
 function readingText(r=current){if(!r)return '';const result=displayReading(r);const parts=['未读神谕 · '+dateLabel(r.createdAt),result.spread.name+' / '+r.period+' / '+E.FOCUS_NAMES[r.focus],r.question?'我的问题：'+r.question:'',result.ai?'AI 解读 · OpenRouter · '+result.aiModel:'手写解读'];if(r.spreadId==='choice')parts.push('A：'+r.options.a+'\nB：'+r.options.b);(result.voice?result.overview.filter(b=>b.lead||b.quote||b.story):result.overview).forEach(b=>parts.push('\n【'+b.title+'】\n'+b.text));result.pairs.forEach(b=>parts.push('\n【'+b.title+'】\n'+b.cards+'\n'+b.text));if(result.voice)result.positions.forEach(p=>parts.push(`\n【${p.voice.label}：${p.card.name} · ${p.pick.reversed?'逆位':'正位'}】\n${p.placement}${p.voice.quote?'\n'+p.voice.quoteTitle+'：'+p.voice.quote:''}`));else result.positions.forEach(p=>parts.push(`\n【${p.index+1}. ${p.slot.label}：${p.card.name} · ${p.pick.reversed?'逆位':'正位'}】\n牌位：${p.slot.description}\n象征：${p.card.symbol}\n白话解释：${p.meaning}\n传统牌义：${p.traditionalMeaning}${p.deep}\n结构：${p.structure}\n此位置的解读：${p.placement}\n主题对照：${p.context}\n行动：${p.practice}\n核对：${p.card.prompt}`));result.psychology.forEach(p=>parts.push('\n【心理学视角：'+p.title+'】\n'+p.connection+'\n'+p.evidence+'\n反思练习：'+p.question+'\n适用范围：'+p.limit+'\n来源：'+p.citation+'\n'+p.url));if(result.actions.length)parts.push('\n可带走的行动：\n'+result.actions.map((t,i)=>(i+1)+'. '+t).join('\n'));if(r.note)parts.push('\n我的感受与理解：\n'+r.note);parts.push('\n'+(result.note||NOTE));return parts.filter(Boolean).join('\n');}
 async function copy(text){try{if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(text);else{const t=document.createElement('textarea');t.value=text;t.style.position='fixed';t.style.opacity='0';document.body.append(t);t.select();const ok=document.execCommand('copy');t.remove();if(!ok)throw Error('copy');}toast('已复制完整内容');}catch{toast('未能自动复制，请选中文字复制');}}
@@ -6201,17 +6207,25 @@ function showReflection(){
  $('reflectionText').hidden=!current.reflection;$('reflectionText').textContent=current.reflection;$('copyReflectionBtn').hidden=!current.reflection;
  $('noteStatus').textContent=(current.reflectionSource==='ai'?'AI 回应 · ':'')+(storageOK?'已保存在当前浏览器':'未能保存，请先复制这段话');
 }
-function displayReading(record){const base=E.buildReading(record,cards,depth);return aiViewStatic&&current?.id===record.id?base:A.apply(record,base);}
-function updateAIControls(status,busy=false){
- const base=current?E.buildReading(current,cards,depth):null,saved=base&&A.stored(current,base);
- for(const id of ['aiReadingBtn','enhanceReadingBtn']){$(id).disabled=busy||!!saved;$(id).textContent=busy?'AI 正在读这次的问题…':saved?'AI 解读已保存':'用 AI 再读一次 ↗';}
- const message=status||(reading?.ai?'AI 解读 · 已保存，下次回看不再生成':saved?'手写解读 · 可切回已保存的 AI 解读':'手写解读 · AI 可选');
+function displayReading(record){const base=E.buildReading(record,cards,depth);return aiSettings.get()?A.apply(record,base):base;}
+function failureKey(record){return record.id+':'+A.signature(record);}
+function ensureAIReading(){
+ if(!current||!aiSettings.get()||aiRequest)return;
+ const base=E.buildReading(current,cards,depth);
+ if(!A.stored(current,base)&&!aiFailures.has(failureKey(current)))enhanceReading();
+}
+function updateAIControls(status){
+ const enabled=!!aiSettings.get(),busy=!!aiRequest,failure=current&&aiFailures.get(failureKey(current));
+ for(const id of ['aiReadingBtn','enhanceReadingBtn']){$(id).hidden=!enabled||busy||!failure||!!reading?.ai;$(id).disabled=busy;$(id).textContent='重试 AI 解读';}
+ const message=status||(busy?'正在生成 AI 解读…':reading?.ai?'AI 解读 · 已保存':failure&&enabled?failure+' 当前显示基础解读。':'基础解读');
  $('aiReadingStatus').textContent=message;$('briefAiStatus').textContent=message;
- $('staticReadingBtn').hidden=!saved;$('staticReadingBtn').textContent=reading?.ai?'看手写解读':'看 AI 解读';
- $('journalAiNotice').hidden=!aiSettings.get();
+ $('reading').dataset.aiPending=String(busy);$('readingDialog').dataset.aiPending=String(busy);
+ $('saveNoteBtn').disabled=busy||!!reflectionRequest;
+ $('aiSettingsBtn').textContent=enabled?'AI 设置 · 已启用':'接入 AI 解读';
+ $('journalAiNotice').hidden=!enabled;
 }
 function cancelAIRequests(){aiRequest?.abort();reflectionRequest?.abort();aiRequest=null;reflectionRequest=null;$('saveNoteBtn').disabled=false;}
-function openAISettings(){const settings=aiSettings.get();$('aiKey').value='';$('aiKey').placeholder=settings?'已填写；留空则沿用当前 Key':'只填写你自己的 Key';$('aiModel').value=settings?.model||A.DEFAULT_MODEL;$('aiRemember').checked=aiSettings.remembered();$('aiConnectionStatus').textContent=settings?'已启用。点“用 AI 再读一次”才会发送问题和牌面。':'未启用，手写解读照常可用。';$('aiSettingsDialog').showModal();}
+function openAISettings(){const settings=aiSettings.get();$('aiKey').value='';$('aiKey').placeholder=settings?'已填写；留空则沿用当前 Key':'只填写你自己的 Key';$('aiModel').value=settings?.model||A.DEFAULT_MODEL;$('aiRemember').checked=aiSettings.remembered();$('aiConnectionStatus').textContent=settings?'已启用。翻牌后自动生成 AI 解读。':'未启用，使用网站的基础解读。';$('aiSettingsDialog').showModal();}
 function settingsFromForm(){return {key:$('aiKey').value.trim()||aiSettings.get()?.key||'',model:$('aiModel').value.trim()};}
 function preserveReadingView(record){
  const tab=['overview','details','journal'].find(id=>$(id+'Tab').getAttribute('aria-selected')==='true')||'overview',scroll=$('readingDialog').scrollTop,note=$('feeling').value;
@@ -6220,23 +6234,22 @@ function preserveReadingView(record){
 async function enhanceReading(){
  if(!current||aiRequest)return;const settings=aiSettings.get();if(!settings){openAISettings();return;}
  const target={...current,picks:current.picks.map(p=>({...p}))},base=E.buildReading(target,cards,depth);if(A.stored(target,base))return;
- const token=generation,controller=new AbortController();aiRequest=controller;updateAIControls('正在围绕本次问题生成，手写解读可以先看。',true);
+ const token=generation,controller=new AbortController();aiRequest=controller;aiFailures.delete(failureKey(target));updateAIControls();
  try{
   const result=await A.generate(settings,target,base,window.ORACLE_VOICE,{signal:controller.signal});
   const saved=history.find(r=>r.id===target.id);if(!saved||A.signature(saved)!==A.signature(target))return;
   saved.aiResult=result;saveHistory();
-  if(current?.id===target.id&&generation===token&&mode==='revealed'){aiRequest=null;aiViewStatic=false;preserveReadingView(saved);}
- }catch(error){if(error.code!=='cancelled'&&current?.id===target.id&&generation===token)updateAIControls(A.message(error));}
- finally{if(aiRequest===controller){aiRequest=null;if(current?.id===target.id&&generation===token){$('aiReadingBtn').disabled=false;$('enhanceReadingBtn').disabled=false;}}}
+  if(current?.id===target.id&&generation===token&&mode==='revealed'){aiRequest=null;aiFailures.delete(failureKey(target));preserveReadingView(saved);}
+ }catch(error){if(error.code!=='cancelled'&&current?.id===target.id&&generation===token)aiFailures.set(failureKey(target),A.message(error));}
+ finally{if(aiRequest===controller){aiRequest=null;if(current?.id===target.id&&generation===token)updateAIControls();}}
 }
 $('aiSettingsBtn').onclick=openAISettings;$('aiReadingBtn').onclick=enhanceReading;$('enhanceReadingBtn').onclick=enhanceReading;
-$('staticReadingBtn').onclick=()=>{if(!current)return;aiViewStatic=!aiViewStatic;preserveReadingView(current);};
-$('aiEnableBtn').onclick=()=>{try{const settings=settingsFromForm();aiSettings.configure(settings.key,settings.model,$('aiRemember').checked);cancelAIRequests();connectionRequest?.abort();connectionRequest=null;$('aiTestBtn').disabled=false;$('aiKey').value='';$('aiKey').placeholder='已填写；留空则沿用当前 Key';$('aiConnectionStatus').textContent='已启用。'+(aiSettings.remembered()?'Key 已保存在当前浏览器。':'刷新或关闭页面后，需要重新填写 Key。')+' 回到解读后，点“用 AI 再读一次”。';updateAIControls();}catch(error){$('aiConnectionStatus').textContent=A.message(error);}};
+$('aiEnableBtn').onclick=()=>{try{const settings=settingsFromForm();aiSettings.configure(settings.key,settings.model,$('aiRemember').checked);cancelAIRequests();connectionRequest?.abort();connectionRequest=null;$('aiTestBtn').disabled=false;$('aiKey').value='';$('aiKey').placeholder='已填写；留空则沿用当前 Key';$('aiConnectionStatus').textContent='已启用。'+(aiSettings.remembered()?'Key 已保存在当前浏览器。':'刷新或关闭页面后，需要重新填写 Key。')+' 翻牌后将自动生成 AI 解读。';aiFailures.clear();if(current&&mode==='revealed')preserveReadingView(current);else updateAIControls();}catch(error){$('aiConnectionStatus').textContent=A.message(error);}};
 $('aiTestBtn').onclick=async()=>{
  if(connectionRequest)return;const controller=new AbortController();connectionRequest=controller;$('aiTestBtn').disabled=true;$('aiConnectionStatus').textContent='正在测试连接，只发送测试文字…';
  try{await A.test(settingsFromForm(),{signal:controller.signal});$('aiConnectionStatus').textContent='已连上，免费模型能返回结果。点击“启用 AI”后使用。';}catch(error){if(error.code!=='cancelled')$('aiConnectionStatus').textContent=A.message(error);}finally{if(connectionRequest===controller){connectionRequest=null;$('aiTestBtn').disabled=false;}}
 };
-$('aiClearBtn').onclick=()=>{cancelAIRequests();connectionRequest?.abort();connectionRequest=null;$('aiTestBtn').disabled=false;$('aiKey').value='';$('aiKey').placeholder='只填写你自己的 Key';$('aiRemember').checked=false;try{aiSettings.clear();$('aiConnectionStatus').textContent='Key 已清除。已保存的解读和手记仍然保留。';}catch(error){$('aiConnectionStatus').textContent=A.message(error);}updateAIControls();};
+$('aiClearBtn').onclick=()=>{cancelAIRequests();connectionRequest?.abort();connectionRequest=null;$('aiTestBtn').disabled=false;$('aiKey').value='';$('aiKey').placeholder='只填写你自己的 Key';$('aiRemember').checked=false;try{aiSettings.clear();$('aiConnectionStatus').textContent='Key 已清除。已保存的解读和手记仍然保留。';}catch(error){$('aiConnectionStatus').textContent=A.message(error);}if(current&&mode==='revealed')preserveReadingView(current);else updateAIControls();};
 $('aiSettingsDialog').addEventListener('close',()=>{connectionRequest?.abort();connectionRequest=null;$('aiTestBtn').disabled=false;$('aiKey').value='';});
 $('feeling').addEventListener('input',()=>{if(reflectionRequest){reflectionRequest.abort();reflectionRequest=null;$('saveNoteBtn').disabled=false;$('noteStatus').textContent='手记已修改，点“说给牌听”重新回应。';}});
 
@@ -6268,7 +6281,7 @@ document.querySelector('.expanded-tabs').onkeydown=e=>{if(!['ArrowLeft','ArrowRi
 $('viewReportBtn').onclick=()=>openDetails('overview');$('viewJournalBtn').onclick=()=>openDetails('journal');$('saveNoteBtn').onclick=tellCards;$('copyReflectionBtn').onclick=()=>copy(current?.reflection||'');$('feeling').onkeydown=e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){e.preventDefault();tellCards();}};$('copyReadingBtn').onclick=()=>copy(readingText());$('saveImageBtn').onclick=saveImage;
 document.querySelectorAll('.close-dialog').forEach(b=>b.onclick=()=>b.closest('dialog').close());document.querySelectorAll('dialog').forEach(d=>d.addEventListener('click',e=>{const r=d.getBoundingClientRect();if(e.target===d&&(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom))d.close();}));
 let displayedDay='';function dateUpdate(){const day=localDay(new Date());$('dateText').textContent=new Intl.DateTimeFormat('zh-CN',{month:'2-digit',day:'2-digit',weekday:'long'}).format(new Date()).replaceAll('/',' · ');if(day!==displayedDay){displayedDay=day;historyStatus();}}dateUpdate();setInterval(dateUpdate,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)dateUpdate();});
-loadHistory();updateSound();historyStatus();setupStars();deck=cards.map(c=>({cardId:c.id,reversed:false}));renderDeck();updateSetup();const today=history.find(r=>r.date===localDay(new Date()));if(today&&!today.legacyImported)renderReading(today);
+loadHistory();updateSound();historyStatus();updateAIControls();setupStars();deck=cards.map(c=>({cardId:c.id,reversed:false}));renderDeck();updateSetup();const today=history.find(r=>r.date===localDay(new Date()));if(today&&!today.legacyImported)renderReading(today);
 })();
 
 </script>
